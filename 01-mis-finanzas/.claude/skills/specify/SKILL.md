@@ -2,8 +2,9 @@
 name: specify
 description: >-
   Spec out a new feature using the Requirements-First approach before writing
-  any code: produce a requirements.md (EARS-format acceptance criteria) and,
-  after user approval, a design.md (technical architecture). Use this WHENEVER
+  any code: produce a requirements.md (EARS-format acceptance criteria), then a
+  design.md (technical architecture), then a tasks.md (ordered TDD task list that
+  doubles as the execution/decision log) — each after user approval. Use this WHENEVER
   the user wants to define, spec, plan, or scope a new feature or capability —
   phrases like "spec this out", "write requirements", "let's define the
   feature", "before we build", "escribir el spec", "definir la feature", or
@@ -21,9 +22,11 @@ will do it (architecture). Locking behavior before design keeps the design
 honest — every technical decision traces back to a requirement instead of the
 requirements being reverse-engineered to fit whatever got built.
 
-The scope of this skill is two artifacts: **requirements.md** and
-**design.md**. (Breaking design into implementation tasks is intentionally out
-of scope for now.)
+The scope of this skill is three artifacts: **requirements.md**, **design.md**,
+and **tasks.md**. The first two define *what* and *how*; the third breaks the
+approved design into an ordered, traceable task list that doubles as the
+execution log — the durable record of the decisions made while implementing
+each task.
 
 ## Language — write the specs in English
 
@@ -49,7 +52,8 @@ never collide:
 ```
 docs/specs/<YYYY-MM-DD>-<feature-slug>/
 ├── requirements.md
-└── design.md
+├── design.md
+└── tasks.md
 ```
 
 - `<YYYY-MM-DD>` — today's date. If you don't know it, ask or check the
@@ -59,11 +63,12 @@ docs/specs/<YYYY-MM-DD>-<feature-slug>/
 
 ## The workflow — and the approval gate
 
-Produce the two documents in order, with a **hard stop for user approval**
-between them. This gate is the point of the whole method: requirements are
-cheap to change and design decisions compound on top of them, so it's far
-cheaper to correct behavior now than after a design is built around the wrong
-behavior.
+Produce the documents in order, with a **hard stop for user approval** between
+each phase. This gate is the point of the whole method: requirements are cheap
+to change and design decisions compound on top of them, so it's far cheaper to
+correct behavior now than after a design — or a task list — is built around the
+wrong behavior. The same logic applies to the tasks: get the design signed off
+before decomposing it into work.
 
 **Coming from `/brainstorming`?** This skill is the "spec" stage of the project
 workflow (`brainstorm → spec → ejecución → verificación → commit`), so it often
@@ -95,10 +100,30 @@ agreed behavior into numbered EARS requirements, then write it up as `design.md`
    data model, and error path should trace back to a numbered acceptance
    criterion. If the design surfaces a gap in requirements, go back and update
    `requirements.md` rather than silently designing past it.
-6. Present the design for review.
+6. Present the design for review. **Stop and wait for approval** before
+   decomposing it into tasks. Iterate on the design until the user approves.
 
-Keep both documents in sync: if requirements change later, the design must be
-revisited.
+### Phase 3 — Tasks
+
+7. Only after the design is approved, copy `assets/tasks-template.md` into the
+   feature folder as `tasks.md` and fill it in. Break the design into an
+   **ordered list of small, testable tasks**, each sized to one red→green→verify
+   TDD cycle.
+8. **Trace every task** to the design component(s) and requirement criteria it
+   implements, and fill the **Requirements coverage** table so every acceptance
+   criterion maps to at least one task. A criterion with no task is a gap — close
+   it before implementation starts.
+9. Leave each task's **Decision log** and **Outcome** empty at first. These are
+   filled *during* execution, not now: as each task is implemented, append the
+   decisions, discoveries, and any deviations from the design to its log, so
+   `tasks.md` becomes the running record of *why* the code turned out the way it
+   did. This is what makes the file a log, not just a checklist.
+10. Present the task list for review.
+
+Keep the three documents in sync: if requirements change later, the design and
+tasks must be revisited; if implementation reveals the design was wrong, update
+`design.md` (and `requirements.md` if needed) and note it in the affected task's
+Decision log.
 
 ## EARS notation for acceptance criteria
 
@@ -150,6 +175,7 @@ so that I can see spending grouped by category.
 
 - `assets/requirements-template.md` — structure for the requirements document.
 - `assets/design-template.md` — structure for the design document.
+- `assets/tasks-template.md` — structure for the task list / execution log.
 
 Copy them into the feature folder rather than writing from scratch, then delete
 the guidance placeholders (`<...>`) as you fill each section. Drop sections that
