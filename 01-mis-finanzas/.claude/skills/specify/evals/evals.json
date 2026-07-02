@@ -1,0 +1,56 @@
+{
+  "skill_name": "specify",
+  "evals": [
+    {
+      "id": 0,
+      "name": "budget-monthly-categories",
+      "prompt": "Quiero agregar presupuestos mensuales por categoría a la app de mis finanzas. Antes de ponernos a codear, ayúdame a dejar el spec bien definido.",
+      "expected_output": "Creates docs/specs/<date>-<slug>/requirements.md from the template with numbered EARS acceptance criteria in English, then pauses for approval before design.md.",
+      "files": [],
+      "assertions": [
+        "requirements.md is created inside a date-stamped folder docs/specs/2026-07-02-<slug>/",
+        "Acceptance criteria use EARS notation (WHEN / IF / THEN / WHILE / WHERE combined with SHALL)",
+        "Requirements and their criteria are numbered and traceable (e.g. Requirement 1, criteria 1.1, 1.2)",
+        "Contains user stories in the form 'As a <role>, I want <capability>, so that <benefit>'",
+        "Includes at least one error / unwanted-behavior criterion (IF ... THEN THE SYSTEM SHALL ...)",
+        "Requirements content is written in English",
+        "Respected the approval gate: paused for user approval after requirements before creating design.md",
+        "design.md (produced after simulated approval) has architecture, data models, error handling and testing-strategy sections that trace back to requirement numbers"
+      ]
+    },
+    {
+      "id": 1,
+      "name": "expense-auto-categorization",
+      "prompt": "Necesito definir cómo va a funcionar la categorización automática de gastos según el nombre del comercio. Escribamos primero las requirements.",
+      "expected_output": "Requirements-first: requirements.md with user stories + EARS criteria covering happy and error paths, numbered and traceable, in the dated specs folder.",
+      "files": [],
+      "assertions": [
+        "requirements.md is created inside a date-stamped folder docs/specs/2026-07-02-<slug>/",
+        "Acceptance criteria use EARS notation (WHEN / IF / THEN / WHILE / WHERE combined with SHALL)",
+        "Requirements and their criteria are numbered and traceable (e.g. Requirement 1, criteria 1.1, 1.2)",
+        "Contains user stories in the form 'As a <role>, I want <capability>, so that <benefit>'",
+        "Includes at least one error / unwanted-behavior criterion (IF ... THEN THE SYSTEM SHALL ...)",
+        "Requirements content is written in English",
+        "Respected the approval gate: paused for user approval after requirements before creating design.md",
+        "design.md (produced after simulated approval) has architecture, data models, error handling and testing-strategy sections that trace back to requirement numbers"
+      ]
+    },
+    {
+      "id": 2,
+      "name": "csv-bank-import",
+      "prompt": "Quiero specar una feature para importar movimientos bancarios desde un CSV que exporta mi banco.",
+      "expected_output": "Asks a few sharp clarifying questions when the idea is vague, then produces requirements.md in EARS with out-of-scope and open-questions sections.",
+      "files": [],
+      "assertions": [
+        "requirements.md is created inside a date-stamped folder docs/specs/2026-07-02-<slug>/",
+        "Acceptance criteria use EARS notation (WHEN / IF / THEN / WHILE / WHERE combined with SHALL)",
+        "Requirements and their criteria are numbered and traceable (e.g. Requirement 1, criteria 1.1, 1.2)",
+        "Contains user stories in the form 'As a <role>, I want <capability>, so that <benefit>'",
+        "Includes at least one error / unwanted-behavior criterion (IF ... THEN THE SYSTEM SHALL ...)",
+        "Surfaced sharp clarifying questions before committing to requirements (the prompt is intentionally vague)",
+        "Uses the Out of scope and/or Open questions sections from the template",
+        "Respected the approval gate: paused for user approval after requirements before creating design.md"
+      ]
+    }
+  ]
+}
