@@ -16,7 +16,11 @@ npm test            # vitest run
 
 ## Workflow de trabajo
 
-brainstorm definicion → spec (docs/) → ejecución (TDD) → verificación → commit
+`/brainstorming` (definición) → `/specify` (spec en `docs/`) → ejecución (TDD) → verificación → commit
+
+- **`/brainstorming`** — explora la idea y termina con un diseño aprobado. Al aprobarlo, enlaza con `/specify`.
+- **`/specify`** — formaliza el diseño aprobado en `docs/specs/<YYYY-MM-DD>-<feature>/`: primero `requirements.md` (criterios EARS), pausa para aprobación; luego `design.md`, pausa; luego `tasks.md` (lista de tareas TDD que además sirve de bitácora de decisiones).
+- Con el `tasks.md` aprobado, pasa a la ejecución en TDD, registrando en cada tarea su Decision log y Outcome.
 
 ## Reglas
 

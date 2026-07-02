@@ -122,9 +122,10 @@ def build_run(root: Path, run_dir: Path) -> dict | None:
     outputs_dir = run_dir / "outputs"
     output_files: list[dict] = []
     if outputs_dir.is_dir():
-        for f in sorted(outputs_dir.iterdir()):
+        for f in sorted(outputs_dir.rglob("*")):
             if f.is_file() and f.name not in METADATA_FILES:
-                output_files.append(embed_file(f))
+                rel = f.relative_to(outputs_dir)
+                output_files.append(embed_file(f, display_name=str(rel)))
 
     # Load grading if present
     grading = None
@@ -146,10 +147,11 @@ def build_run(root: Path, run_dir: Path) -> dict | None:
     }
 
 
-def embed_file(path: Path) -> dict:
+def embed_file(path: Path, display_name: str | None = None) -> dict:
     """Read a file and return an embedded representation."""
     ext = path.suffix.lower()
     mime = get_mime_type(path)
+    name = display_name or path.name
 
     if ext in TEXT_EXTENSIONS:
         try:
@@ -157,7 +159,7 @@ def embed_file(path: Path) -> dict:
         except OSError:
             content = "(Error reading file)"
         return {
-            "name": path.name,
+            "name": name,
             "type": "text",
             "content": content,
         }
@@ -166,9 +168,9 @@ def embed_file(path: Path) -> dict:
             raw = path.read_bytes()
             b64 = base64.b64encode(raw).decode("ascii")
         except OSError:
-            return {"name": path.name, "type": "error", "content": "(Error reading file)"}
+            return {"name": name, "type": "error", "content": "(Error reading file)"}
         return {
-            "name": path.name,
+            "name": name,
             "type": "image",
             "mime": mime,
             "data_uri": f"data:{mime};base64,{b64}",
@@ -178,9 +180,9 @@ def embed_file(path: Path) -> dict:
             raw = path.read_bytes()
             b64 = base64.b64encode(raw).decode("ascii")
         except OSError:
-            return {"name": path.name, "type": "error", "content": "(Error reading file)"}
+            return {"name": name, "type": "error", "content": "(Error reading file)"}
         return {
-            "name": path.name,
+            "name": name,
             "type": "pdf",
             "data_uri": f"data:{mime};base64,{b64}",
         }
@@ -189,9 +191,9 @@ def embed_file(path: Path) -> dict:
             raw = path.read_bytes()
             b64 = base64.b64encode(raw).decode("ascii")
         except OSError:
-            return {"name": path.name, "type": "error", "content": "(Error reading file)"}
+            return {"name": name, "type": "error", "content": "(Error reading file)"}
         return {
-            "name": path.name,
+            "name": name,
             "type": "xlsx",
             "data_b64": b64,
         }
@@ -201,9 +203,9 @@ def embed_file(path: Path) -> dict:
             raw = path.read_bytes()
             b64 = base64.b64encode(raw).decode("ascii")
         except OSError:
-            return {"name": path.name, "type": "error", "content": "(Error reading file)"}
+            return {"name": name, "type": "error", "content": "(Error reading file)"}
         return {
-            "name": path.name,
+            "name": name,
             "type": "binary",
             "mime": mime,
             "data_uri": f"data:{mime};base64,{b64}",
