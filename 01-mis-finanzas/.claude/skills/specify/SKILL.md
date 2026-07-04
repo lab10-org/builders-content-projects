@@ -103,22 +103,29 @@ agreed behavior into numbered EARS requirements, then write it up as `design.md`
 6. Present the design for review. **Stop and wait for approval** before
    decomposing it into tasks. Iterate on the design until the user approves.
 
-### Phase 3 — Tasks
+### Phase 3 — Tasks (delegated to `/planning-tasks`)
 
-7. Only after the design is approved, copy `assets/tasks-template.md` into the
-   feature folder as `tasks.md` and fill it in. Break the design into an
-   **ordered list of small, testable tasks**, each sized to one red→green→verify
-   TDD cycle.
-8. **Trace every task** to the design component(s) and requirement criteria it
-   implements, and fill the **Requirements coverage** table so every acceptance
-   criterion maps to at least one task. A criterion with no task is a gap — close
-   it before implementation starts.
-9. Leave each task's **Decision log** and **Outcome** empty at first. These are
+7. Only after the design is approved, produce `tasks.md` by invoking the
+   **`planning-tasks` skill** — do not hand-write the task list inline. That
+   skill orchestrates the `planner` subagent (`.claude/agents/planner.md`):
+   one bootstrap invocation drafts the list from `assets/tasks-template.md`,
+   then one invocation per task evaluates and refines it until **every task
+   reaches `CRITERIA MET`**. Per-task convergence against the real codebase is
+   the point — a hand-written list skips exactly that audit.
+8. The converged file must still satisfy this skill's contract (the planner
+   enforces it): every task sized to one red→green→verify TDD cycle, **traced**
+   to the design component(s) and requirement criteria it implements, and a
+   **Requirements coverage** table where every acceptance criterion maps to at
+   least one task. A criterion with no task is a gap — close it before
+   implementation starts.
+9. Each task's **Decision log** and **Outcome** stay empty at first. These are
    filled *during* execution, not now: as each task is implemented, append the
    decisions, discoveries, and any deviations from the design to its log, so
    `tasks.md` becomes the running record of *why* the code turned out the way it
    did. This is what makes the file a log, not just a checklist.
-10. Present the task list for review.
+10. Present the task list for review. If requirements or design change after
+    approval, re-run `/planning-tasks` to re-converge `tasks.md` instead of
+    patching it by hand.
 
 Keep the three documents in sync: if requirements change later, the design and
 tasks must be revisited; if implementation reveals the design was wrong, update
