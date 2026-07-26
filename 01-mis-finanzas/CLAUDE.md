@@ -20,7 +20,8 @@ npm test            # vitest run
 
 - **`/brainstorming`** — explora la idea y termina con un diseño aprobado. Al aprobarlo, enlaza con `/specify`.
 - **`/specify`** — formaliza el diseño aprobado en `docs/specs/<YYYY-MM-DD>-<feature>/`: primero `requirements.md` (criterios EARS), pausa para aprobación; luego `design.md`, pausa. La Fase 3 (`tasks.md`) no se escribe a mano: se delega en `/planning-tasks`.
-- **`/planning-tasks`** — orquesta subagentes `planner` (`.claude/agents/planner.md`) para crear e iterar el `tasks.md`: un bootstrap si no existe, luego una invocación por tarea hasta que el 100% alcance `CRITERIA MET`. También sirve para re-planear o auditar un `tasks.md` existente tras un cambio de spec. Termina presentando el plan para aprobación del usuario.
+- **`/planning-tasks`** — asegura el input (spec con `requirements.md` y `design.md` aprobados) y lanza el workflow `converge-tasks` (`.claude/workflows/converge-tasks.js`), que hace toda la planeación: bootstrap si no existe, fan-out de planners read-only por tarea, síntesis, y un único write de `tasks.md`. También sirve para re-planear o auditar tras un cambio de spec. Termina relayando el reporte del workflow y presentando el plan para aprobación del usuario.
+- **`converge-tasks`** (workflow) — el motor de planeación: subagentes `planner` (`.claude/agents/planner.md`) son **read-only** (solo juzgan y proponen); el workflow reconcilia sus propuestas en un paso de síntesis y es el único que escribe `tasks.md`.
 - Con el `tasks.md` aprobado, pasa a la ejecución en TDD, registrando en cada tarea su Decision log y Outcome.
 
 ## Reglas
