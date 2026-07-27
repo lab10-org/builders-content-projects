@@ -1,6 +1,6 @@
 # Tasks — Register expenses (with AI-suggested category)
 
-**Status:** Draft
+**Status:** Complete — all 9 tasks implemented and verified (2026-07-26)
 **Date:** 2026-07-03
 **Requirements:** ./requirements.md
 **Design:** ./design.md
@@ -36,16 +36,16 @@ just *what* was built.
 
 ## Task overview
 
-- [ ] **T1** — Scaffold Next.js + TypeScript + Vitest project
-- [ ] **T2** — Domain: fixed categories and valid expense creation
-- [ ] **T3** — Domain: field validation with aggregated errors
-- [ ] **T4** — Storage: `loadExpenses` / `saveExpenses` over `localStorage`
-- [ ] **T5** — AI suggestion logic: `normalizeCategory` / `suggestCategory`
-- [ ] **T6** — API route: `POST /api/suggest-category`
-- [ ] **T7** — UI: `ExpenseList` and load-on-mount display
-- [ ] **T8a** — UI: `ExpenseForm` submit → validate, persist, show in the list
-- [ ] **T8b** — UI: validation and save errors are shown without losing input
-- [ ] **T9** — UI: AI suggestion wiring ("Sugerir")
+- [x] **T1** — Scaffold Next.js + TypeScript + Vitest project
+- [x] **T2** — Domain: fixed categories and valid expense creation
+- [x] **T3** — Domain: field validation with aggregated errors
+- [x] **T4** — Storage: `loadExpenses` / `saveExpenses` over `localStorage`
+- [x] **T5** — AI suggestion logic: `normalizeCategory` / `suggestCategory`
+- [x] **T6** — API route: `POST /api/suggest-category`
+- [x] **T7** — UI: `ExpenseList` and load-on-mount display
+- [x] **T8a** — UI: `ExpenseForm` submit → validate, persist, show in the list
+- [x] **T8b** — UI: validation and save errors are shown without losing input
+- [x] **T9** — UI: AI suggestion wiring ("Sugerir")
 
 ## Requirements coverage
 
@@ -57,7 +57,7 @@ just *what* was built.
 | 1.4                   | T3          |
 | 1.5                   | T3          |
 | 1.6                   | T3, T8b     |
-| 1.7                   | T2          |
+| 1.7                   | T2, T3      |
 | 2.1                   | T2          |
 | 2.2                   | T8a         |
 | 2.3                   | T3          |
@@ -81,7 +81,7 @@ just *what* was built.
 
 ### T1 — Scaffold Next.js + TypeScript + Vitest project
 
-- **Status:** `[ ]`
+- **Status:** `[x]`
 - **Traces to:** Design → Architecture / build tooling (no acceptance criterion
   directly; foundation for all other tasks — the project folder currently has no
   `package.json`, source, or tests).
@@ -151,14 +151,69 @@ later tasks can follow red→green→verify.
 
 **Decision log:**
 
+- Scaffolded by hand (no `create-next-app`), as the plan requires: the folder
+  already held `CLAUDE.md`, `docs/` and `.claude/`.
+- Versions installed: `next@15`, `react@19`, `react-dom@19`, `typescript@5.7`,
+  `vitest@2.1`, `@types/*`. No ESLint, no Tailwind — no requirement asks for
+  them.
+- `tsconfig.json` uses `module: "esnext"` + `moduleResolution: "bundler"`,
+  `jsx: "preserve"`, `strict: true`, and `lib` including `DOM`/`DOM.Iterable`
+  (load-bearing for `localStorage` in T4 and React DOM types in T7). Dropped
+  `incremental` (it only writes a `.tsbuildinfo` we do not need under
+  `--noEmit`).
+- `vitest.config.ts` pins `environment: "node"` and keeps the default include
+  glob, so tests under both `src/` and `app/` are discovered (T6/T7 need this).
+- `.gitignore` and `.env.local` live in this project folder, not the repo root
+  (the git root is the parent directory and its `.gitignore` only covers Python
+  artifacts).
+- `next-env.d.ts` was not needed: `tsc --noEmit` is clean without it, so no
+  `next dev`/`next build` run was required to generate it.
+- Addendum (raised in verification): `tsconfig.json` also carries `allowJs`,
+  `plugins: [{ name: "next" }]` and `exclude: ["node_modules"]` — standard
+  Next.js defaults not spelled out in the plan; all inert here (there are no
+  `.js` sources). The `*.tsbuildinfo` line in `.gitignore` is vestigial from the
+  dropped `incremental` option and left as harmless. Resolved installs are
+  `typescript@5.9.3` and `vitest@2.1.9` (ranges `^5.7.0` / `^2.1.0`).
+- Warning for the manual `npm run dev` check: Next.js rewrites `tsconfig.json`
+  in place on first run (it injects `.next/types/**/*.ts` into `include`).
+  Review that diff rather than committing it blind.
+
 **Outcome:**
+
+Scaffold verified by `task-verifier` (PASS). `npm run typecheck` (`tsc
+--noEmit`) exits 0 and `npm test` (`vitest run`) reports 1 passed / 1 file — the
+red→green→verify loop is usable from T2 onward.
+
+Verified concretely:
+
+- `tsc --listFiles` confirms the program contains `src/domain/expense.ts`,
+  `src/domain/expense.test.ts`, `app/layout.tsx` and `app/page.tsx` — test files
+  and `app/` really are type-checked, as the plan required.
+- A temporary probe test placed in `app/` was discovered by the default Vitest
+  include glob and ran under the pinned `node` environment (`typeof window ===
+  "undefined"`), confirming the discovery guarantee T6/T7 depend on. Probe
+  deleted; working tree unchanged.
+- `next-env.d.ts` is genuinely unnecessary: the file does not exist and
+  `tsc --noEmit` is still clean.
+- `.gitignore` is effective from the project folder — `node_modules/` and
+  `.env.local` do not appear in `git status`.
+- Dependency surface is exactly the plan's: `next@15`, `react`/`react-dom@19`,
+  `typescript@5.9`, `vitest@2.1`, `@types/*`. No ESLint, Tailwind, jsdom,
+  testing-library or `@anthropic-ai/sdk` — feature deps correctly deferred.
+
+Known-and-accepted: `src/domain/expense.test.ts` asserts only
+`expect(CATEGORIES).toBeDefined()`. That is a runner smoke test, not coverage of
+criterion 2.1; T2 replaces it with the real contract assertion.
+
+Not executed: the optional `npm run dev` render check.
 
 ### T2 — Domain: fixed categories and valid expense creation
 
-- **Status:** `[ ]`
+- **Status:** `[x]`
 - **Traces to:** 1.1 (domain half: valid input yields a stored-ready `Expense`
-  with a unique id — actual storing is T8a), 1.7, 2.1 → Design → Domain
-  (`src/domain/expense.ts`)
+  with a unique id — actual storing is T8a), 1.7 (normalization half: dates
+  normalized to `YYYY-MM-DD` and amounts parsed to numbers; the *positivity*
+  half lands with 1.2 in T3), 2.1 → Design → Domain (`src/domain/expense.ts`)
 - **Depends on:** T1
 
 **Objective:** `CATEGORIES` exposes exactly the six fixed values, `isCategory`
@@ -205,13 +260,75 @@ normalized `Expense` with a unique id.
 
 **Decision log:**
 
+- **Date normalization is timezone-independent by construction.** `normalizeDate`
+  parses the input into year/month/day parts with
+  `/^(\d{1,4})-(\d{1,2})-(\d{1,2})$/`, rebuilds them through
+  `Date.UTC(y, m - 1, d)`, and formats the result from the **UTC** getters
+  (`getUTCFullYear`/`getUTCMonth`/`getUTCDate`). Local-time getters would shift
+  the day in a negative-offset timezone (the repo's own `America/Bogotá`), which
+  is exactly the trap the plan warned about. This is the module's single date
+  path, as the plan requires.
+- **Roll-over is normalized here, not rejected.** `2026-02-30` currently comes
+  back as `2026-03-02`. That is deliberate: T3 owns the rejection and does it by
+  comparing the normalized result back against the input's own parts, reusing
+  this helper instead of introducing a second date path.
+- **`parseDateParts` is separate from `normalizeDate`** so T3 can do that
+  numeric parts comparison (`7` vs `07` must not read as a mismatch) without
+  re-parsing the string.
+- **Amount is only *parsed* here, not validated.** `toAmount` returns `null`
+  only when the input is neither a number nor a string; the finite/`> 0` rules
+  are 1.2 and belong to T3. This is what makes `"25000"` → `25000` work while
+  leaving T3 a genuinely red test for `"abc"`, `0` and `-5`.
+- **Three `=== null` guards before building the expense** (`amount`, `date`,
+  `category`) are what let TypeScript narrow `category` to `Category`; they are
+  not redundant with `errors.length`, they are the narrowing itself.
+- Validation messages live in a module-level `MESSAGES` map so T3's branches and
+  T8b's rendering share one source of copy.
+
 **Outcome:**
+
+Verified by `task-verifier` (PASS). `npm run typecheck` clean; `npm test`
+11 passed / 0 failed (`src/domain/expense.test.ts`).
+
+- **2.1** — `expect([...CATEGORIES]).toEqual([...])` pins the six values *and*
+  their order; `isCategory` is asserted true for each of the six and false for
+  `"Mascotas"`, `""`, the case variant `"comida"`, `undefined`, `null`, `42`
+  and an object — the `unknown` surface T4 leans on to drop malformed stored
+  entries.
+- **1.1 (domain half)** — valid input returns `{ ok: true }` with the given
+  amount, trimmed description and category; two consecutive calls produce
+  different ids (`crypto.randomUUID()`), so uniqueness is proven by behavior
+  rather than by a shape check.
+- **1.7 (normalization half)** — a numeric-string amount `"25000"` comes back as
+  the *number* `25000`; date normalization is exercised for real, not just
+  regex-matched: `"2026-7-2"` → `"2026-07-02"` and `"2026-1-15"` →
+  `"2026-01-15"` would both fail against an implementation with no normalization
+  code.
+- The Decision log's timezone claim was tested, not taken on trust: the suite
+  stays green under `TZ=Pacific/Midway` (-11) and `TZ=Pacific/Kiritimati` (+14),
+  consistent with the `Date.UTC` + UTC-getter path.
+- The contract T2 owes T3 was probed and holds: `"2026-02-30"` normalizes to
+  `"2026-03-02"` (so the helper really runs through `Date` and T3's
+  parts-comparison has something to reject), and `"2024-2-29"` survives as a
+  real leap day.
+
+Deliberately out of scope here and still open in **T3**: `createExpense` today
+accepts `amount: -5` and a non-string/empty `description`, and normalizes
+calendar roll-over instead of rejecting it. That is the planned intermediate
+state, not a regression — the `Traces to` line and the coverage table were
+amended to list 1.7 against both T2 and T3 so the gap cannot be lost.
+
+Edge surfaced for T3: `parseDateParts` accepts a 1–4 digit year, and `Date.UTC`
+applies the legacy 0–99 → 1900+year mapping, so `"26-7-2"` normalizes to
+`"1926-07-02"`. T3's parts comparison rejects it — folded into T3's date cases
+so the behavior is pinned deliberately rather than accidentally.
 
 ### T3 — Domain: field validation with aggregated errors
 
-- **Status:** `[ ]`
+- **Status:** `[x]`
 - **Traces to:** 1.2, 1.3, 1.4, 1.5, 1.6 (domain half: no expense produced,
-  all errors reported at once), 2.3 → Design → Domain (`src/domain/expense.ts`)
+  all errors reported at once), 1.7 (positivity half, deferred by T2), 2.3 →
+  Design → Domain (`src/domain/expense.ts`)
 - **Depends on:** T2
 
 **Objective:** `createExpense` rejects every invalid field with a
@@ -229,8 +346,9 @@ the form can annotate every bad field while preserving input.
      with `field === "description"` [1.3]; `ExpenseInput.description` is typed
      `unknown`, so the missing case must be rejected rather than crash on
      `.trim()`;
-   - date `undefined`, `"hola"`, and `"2026-02-30"` (a non-existent calendar
-     day) → error with `field === "date"` [1.4];
+   - date `undefined`, `"hola"`, `"2026-02-30"` (a non-existent calendar day),
+     and `"26-7-2"` (a 2-digit year, which `Date.UTC` silently maps to 1926 —
+     surfaced by T2's verification) → error with `field === "date"` [1.4];
    - category `undefined` and `"Mascotas"` → error with `field === "category"`
      [1.5, 2.3];
    - every returned `ValidationError` carries a non-empty `message` (T8b renders
@@ -254,11 +372,85 @@ the form can annotate every bad field while preserving input.
 
 **Decision log:**
 
+- **Calendar validity is enforced by round-tripping, not by a calendar table.**
+  `normalizeDate` (T2's helper, extended here rather than duplicated) rebuilds
+  the parts through `Date.UTC` and then compares `getUTCFullYear/Month/Date`
+  back against the input's own parts. One comparison catches four distinct
+  families of bad date in one branch: day roll-over (`2026-02-30` →
+  `2026-03-02`), month roll-over (`2026-13-01` → `2027-01-01`), day zero
+  (`2026-07-00` → `2026-06-30`) and the legacy 2-digit-year mapping (`26-7-2` →
+  `1926-07-02`). The comparison is **numeric**, so T2's `"2026-7-2"` case still
+  normalizes instead of failing on a `"7"` vs `"07"` string mismatch.
+- **Amount rejects on type/emptiness *before* coercion.** `Number("")`,
+  `Number("   ")` and `Number(null)` are all `0`, so a missing amount coerced
+  first would look like a zero — a validation error either way here, but for
+  the wrong reason, and it would let a whitespace string through the moment the
+  `> 0` rule changed. `toAmount` therefore guards the type, then the empty
+  string, then `Number.isFinite(parsed) && parsed > 0`.
+- **Every field is guarded on its type first**, because `ExpenseInput`'s fields
+  are `unknown`: `toDescription` returns `null` for a non-string instead of
+  throwing on `.trim()`, which is what makes `description: undefined` a
+  validation error rather than a crash.
+- **Errors accumulate; the four `=== null` checks before building the expense
+  double as TypeScript's narrowing.** No branch returns early on the first
+  failure, which is what gives 1.6 the "all errors at once, no duplicates, none
+  for the valid field" behavior for free.
+- `"2024-02-30"` is included in the tests alongside `"2026-02-30"`: February
+  roll-over must be rejected in a leap year too, and `"2024-2-29"` is asserted
+  to still *pass*, so the rule is "real calendar day", not "reject February".
+
 **Outcome:**
+
+Verified by `task-verifier` (PASS). `npm run typecheck` clean; `npm test`
+48 passed / 0 failed (`src/domain/expense.test.ts`).
+
+- **1.2** — 12 table-driven cases pin the whole rule, not a sample: `undefined`,
+  `null`, `"abc"`, `""`, `"   "`, `NaN`, `Infinity`, `0`, `"0"`, `-5`, `"-5"`
+  and a boolean all return `{ ok: false }` with `field === "amount"`. The
+  Decision log's "reject on type/emptiness *before* coercion" claim is what the
+  `""` and `"   "` cases actually test — under a coerce-first implementation
+  they would pass for the wrong reason (`Number("") === 0`).
+- **1.3** — `""`, `"   "`, `undefined`, `null` and `42` are description errors.
+  The non-string cases are the ones that matter: they prove `toDescription`
+  guards the type instead of throwing on `.trim()`.
+- **1.4** — beyond `undefined`/`null`/`"hola"`/`""`, the four roll-over families
+  the Decision log claims one comparison catches are each pinned:
+  `"2026-02-30"` and `"2024-02-30"` (day), `"2026-13-01"` (month),
+  `"2026-07-00"` (day zero) and `"26-7-2"` (legacy 2-digit-year → 1926, the edge
+  T2's verification surfaced). `"2024-2-29"` is asserted to still *pass* and
+  normalize to `"2024-02-29"`.
+- **1.5 / 2.3** — `undefined`, `null`, `"Mascotas"`, the case variant
+  `"comida"`, `""` and `42` are category errors.
+- **1.6 (domain half)** — a mixed input (`amount: -5`, `description: ""`,
+  `category: "Mascotas"`, valid `date`) yields exactly those three fields, no
+  duplicate field, no error for the valid one, and `expect(result).not
+  .toHaveProperty("expense")`; a fully invalid input yields all four errors,
+  each with a non-empty message (T8b renders them).
+- **1.7 (positivity half, deferred by T2)** — now closed: `0`, `"0"`, `-5`,
+  `"-5"` are rejected by `toAmount`'s `Number.isFinite(parsed) && parsed > 0`.
+
+Tests were probed for vacuity, not taken on trust. A temporary probe (since
+deleted) ran the same criteria against inputs no fixture uses, from a
+deliberately different valid fixture: 30-day-month overflow (`2026-11-31`,
+`2026-04-31`, `2026-06-31`), `2026-02-29` in a non-leap year and month zero are
+all rejected, while `2026-12-31`, `2026-11-30` and `2028-2-29` → `"2028-02-29"`
+are accepted; `0.01` and `"1e5"` pass while `-0`, `"-0"`, `-0.01`, `-Infinity`,
+`[]` and `{}` are rejected — so the amount rule is genuinely "finite and > 0"
+and the date rule genuinely a calendar check, not special-cased fixtures. A
+four-invalid-field input produced four *distinct* messages, so the copy is
+field-specific rather than one generic string. All 20 probe assertions passed.
+
+Timezone independence re-confirmed at T3's boundary: the suite stays green under
+`TZ=Pacific/Midway` (-11) and `TZ=Pacific/Kiritimati` (+14).
+
+Carried forward: `parseDateParts` trims its input, so `"  2026-07-02  "` is
+accepted — T8a/T8b must not rely on the domain rejecting padded date strings.
+`createExpense` also accepts any real calendar date with a 1–4 digit year, since
+no requirement constrains the range.
 
 ### T4 — Storage: `loadExpenses` / `saveExpenses` over `localStorage`
 
-- **Status:** `[ ]`
+- **Status:** `[x]`
 - **Traces to:** 4.1, 4.2 (storage half), 4.5, 4.6 (storage half: write errors
   propagate) → Design → Storage (`src/storage/expenseStorage.ts`)
 - **Depends on:** T2
@@ -304,11 +496,75 @@ throwing; a write failure propagates to the caller.
 
 **Decision log:**
 
+- **`STORAGE_KEY` is exported** — an addition to the design's Storage interface,
+  as the plan anticipated. The UI tests in T7/T8a/T8b seed and assert against
+  the constant instead of duplicating `"mis-finanzas:expenses"` in five files.
+- **`vi.stubGlobal("localStorage", stub)` with a three-method stub.** Assigning
+  `globalThis.localStorage` directly would have to satisfy the full DOM
+  `Storage` interface (`removeItem`, `key`, `length`) to pass `tsc --noEmit`;
+  `vi.stubGlobal` types the value as `unknown`, so a `getItem`/`setItem`/`clear`
+  stub is enough. No new dependency, and `vi.unstubAllGlobals()` in `afterEach`
+  keeps the node-environment tests from T2/T3 unaffected.
+- **`localStorage` is reached through the bare global, never
+  `window.localStorage`**, and only *inside* the two functions — never at module
+  scope. Both constraints are load-bearing: `window` is `undefined` in this
+  task's node environment, and a module-scope read would crash T7's page during
+  Next.js server rendering.
+- **`isExpense` validates the full invariant, not just the shape.** Beyond the
+  design's "shape checks + `isCategory`", it also enforces the `Expense`
+  invariants from design.md's data model: non-empty `id`, finite `amount > 0`,
+  `date` matching `/^\d{4}-\d{2}-\d{2}$/`, non-empty `description`. Storage is
+  the trust boundary — a hand-edited or stale entry must not re-enter the app as
+  a valid `Expense`, and `loadExpenses`'s return type promises `Expense[]`.
+- **`loadExpenses` wraps everything in one try/catch and filters per entry**, so
+  absent key, malformed JSON, a non-array payload and individual bad entries all
+  degrade to `[]` or a filtered list without throwing.
+- **`saveExpenses` has no try/catch on purpose**, so a quota error reaches the
+  caller (T8b turns it into a user-visible message while keeping the input).
+
 **Outcome:**
+
+Verified by `task-verifier` (PASS). `npm run typecheck` clean; `npm test`
+59 passed / 0 failed (`src/storage/expenseStorage.test.ts` 11,
+`src/domain/expense.test.ts` 48 — T3's suite intact, nothing weakened).
+
+- **4.1** — the round-trip test asserts the *store's own contents*
+  (`JSON.parse(stub.entries.get(STORAGE_KEY))`), not just that `saveExpenses`
+  returned, and pins `STORAGE_KEY === "mis-finanzas:expenses"` in the same test,
+  so the constant cannot drift away from the design's persistence schema.
+- **4.2 (storage half)** — the read path is proven *independently of the write
+  path*: "drops only the malformed entries" seeds `localStorage` directly and
+  never calls `saveExpenses`, so a save-side in-memory cache would fail it.
+- **4.5** — 8 corruption modes, not a sample: absent key, malformed JSON, and a
+  table over object / string / number / `null` payloads all return `[]`; a
+  9-entry hostile array (off-list category, wrong `id` type, wrong `amount`
+  type, missing field, wrong shape, `null`, a bare string, a number) yields only
+  the one valid expense; a loop over truncated JSON asserts `not.toThrow`.
+- **4.6 (storage half)** — `setItem` is mocked to throw and
+  `expect(() => saveExpenses(...)).toThrow("QuotaExceededError")` pins the
+  propagation. `saveExpenses` has no try/catch, so this test goes red the moment
+  anyone swallows the error — the guarantee T8b builds its message on.
+- **Anti-vacuity** — a temporary probe re-ran the criteria with fresh data and
+  14 unused angles (seeded load, overwrite-not-append, `getItem` itself
+  throwing, a non-`Error` throwable propagating by identity, and 8 invariant
+  violations including `date: "1999-12-1"`, `amount: 0`, `NaN`, empty `id`,
+  lowercase `"comida"`). All passed: `isExpense` implements the rule, not the
+  fixtures. Probe deleted; tree clean.
+- **Decision log confirmed against the code** — `localStorage` is reached
+  through the bare global and only inside the two functions; calling
+  `loadExpenses()` with the global unstubbed returns `[]` without throwing. No
+  new dependency; `package.json` untouched.
+
+Carried forward (not a defect against 4.5, which only demands "no crash, treat
+as empty"): `isExpense` validates `date` with `/^\d{4}-\d{2}-\d{2}$/` only, so a
+hand-edited `"2026-02-30"` in storage would re-enter the app as a valid
+`Expense` — narrower than design.md's `Expense` invariant ("matches the regex
+**and** a real calendar date"). The domain rejects those on the way in, so only
+externally-written storage can produce one. Logged under Open items.
 
 ### T5 — AI suggestion logic: `normalizeCategory` / `suggestCategory`
 
-- **Status:** `[ ]`
+- **Status:** `[x]`
 - **Traces to:** 3.1 (upstream half: a suggestion resolves to one fixed-list
   category; the HTTP endpoint itself is T6), 3.4, 3.6 (upstream half: AI errors
   propagate out of `suggestCategory` instead of being swallowed, so T6 can turn
@@ -372,11 +628,100 @@ throwing; a write failure propagates to the caller.
 
 **Decision log:**
 
+- `@anthropic-ai/sdk@^0.115.0` installed here, not at T1 — feature deps arrive
+  with the task that needs them.
+- **`client` is typed as a local structural `SuggestClient`, not `Anthropic`** —
+  a deliberate narrowing of the design's `client?: Anthropic`. The design's type
+  would force every test fake to implement the full SDK `Messages` class;
+  `Pick<Anthropic, "messages">` does not help for the same reason. A real SDK
+  client still satisfies the structural shape at the call sites we use, and the
+  type is exported so T6 can reference it.
+- **The default client is cast at the construction site**
+  (`new Anthropic() as unknown as SuggestClient`) rather than widening the
+  parameter type back to `Anthropic`. The fake's assignability is exactly what
+  the test file depends on, so the cast belongs where the real client enters,
+  not on the public signature. The SDK's `create` overloads (streaming,
+  request options) are wider than `SuggestClient`, which is what makes the
+  direct assignment fail.
+- **The whole prompt goes in the single `user` message**, not a separate
+  `system` parameter: `SuggestClient` declares no `system` field, so an object
+  literal carrying one would fail excess-property checking.
+- **`new Anthropic()` is constructed lazily inside `suggestCategory`**, never at
+  module scope. The first attempt to prove this asserted that importing the
+  module with `ANTHROPIC_API_KEY` unset does not throw — verification showed the
+  conclusion is true but the reasoning is not: `@anthropic-ai/sdk@0.115` defaults
+  `apiKey` to `null` when the variable is absent (`client.js:76`) instead of
+  throwing, so an eagerly-constructing module would import cleanly too. That
+  test also read `process.env` directly, turning the suite red for anyone with
+  the key exported in their shell.
+  The guard was replaced with one that has teeth: the SDK is mocked
+  (`vi.mock("@anthropic-ai/sdk", () => ({ default: vi.fn() }))`) and the
+  constructor's call count is captured **at file-evaluation time**, right after
+  the static import of the module under test — a module-scope `new Anthropic()`
+  would already have made it 1. Two more tests pin the other half: calling
+  `suggestCategory` with no client constructs exactly one, and calling it with an
+  injected client constructs none. Mutation-checked: moving the construction to
+  module scope turns 2 of the 20 tests red, and the file passes with
+  `ANTHROPIC_API_KEY=fake-key` exported.
+- **The relay test uses a counter-intuitive reply on purpose:** the fake answers
+  `"Transporte"` for `"Almuerzo con cliente"`. An implementation that classified
+  locally instead of relaying the model's answer would return `"Comida"` and
+  fail — the assertion cannot pass by coincidence.
+- `max_tokens` is 16 (the answer is one word); the test asserts `<= 32` so a
+  small future adjustment does not become a spurious failure, while a runaway
+  value still fails.
+- The text block is extracted with `content.find(block => block.type === "text")`
+  and defaults to `""` before `normalizeCategory`, which is what makes an
+  empty-content or tool-use-only reply fall back to `Otros` instead of throwing.
+
 **Outcome:**
+
+Verified by `task-verifier` (PASS, re-confirmed after two rounds of fixes it
+raised). `npm run typecheck` clean; `npm test` 79 passed / 0 failed
+(`src/ai/suggestCategory.test.ts` 20, `src/domain/expense.test.ts` 48,
+`src/storage/expenseStorage.test.ts` 11).
+
+- **3.1 (upstream half)** — with a fake replying `"Transporte"` to
+  `"Almuerzo con cliente"`, `suggestCategory` returns `Transporte`, so the
+  model's answer is relayed rather than derived locally; a second test asserts
+  the prompt contains the description and all six `CATEGORIES`, and that the
+  call uses `claude-haiku-4-5`.
+- **3.4** — verified on both halves: `normalizeCategory` maps exact matches,
+  case/whitespace variants and the near-miss `"Comidas"` correctly, and
+  `suggestCategory` returns `Otros` for an off-list reply, a reply whose only
+  block is `tool_use`, and an empty `content` array.
+- **3.6 (upstream half)** — a rejecting client makes `suggestCategory` reject
+  with that same error object (`rejects.toBe(failure)`), leaving T6 free to map
+  it to a `502`.
+
+A verifier probe (deleted) added 24 assertions from angles the committed tests
+do not use: 15 arbitrary replies (including `"__proto__"`, `"constructor"`,
+emoji, a 500-char string) all resolve inside `CATEGORIES`; four more
+counter-intuitive description/reply pairs are relayed verbatim; a synchronous
+throw, a non-`Error` rejection and a malformed response all propagate instead of
+degrading to `Otros`; the text block is found even behind a leading `tool_use`
+block. All 24 passed.
+
+Two defects the verifier found in this task's own tests were fixed and
+re-verified rather than carried forward:
+
+1. The old import-safety test read `process.env.ANTHROPIC_API_KEY` directly, so
+   `npm test` went red for anyone with the key exported
+   (`ANTHROPIC_API_KEY=fake-key` → 17 passed / 1 failed). It also asserted only
+   that a *cached* dynamic import resolved, which could never fail.
+2. Even after un-caching it, the premise was wrong: the SDK does not throw
+   without a key, so the test could not detect an eager module-scope client.
+   Replaced with a constructor-count guard (see Decision log). Mutation-checked
+   by moving the construction to module scope: 2 of 20 tests go red. The file
+   now also passes with `ANTHROPIC_API_KEY=fake-key` exported.
+
+The unnecessary cast on the failure test's fake was also removed, which turns
+the Decision log's claim about `SuggestClient` (one-method fakes are assignable
+without casts) into demonstrated fact rather than assertion.
 
 ### T6 — API route: `POST /api/suggest-category`
 
-- **Status:** `[ ]`
+- **Status:** `[x]`
 - **Traces to:** 3.1, 3.5 (server half: `400` on empty description), 3.6
   (server half: failures become `502`), 3.7 → Design → API route
   (`app/api/suggest-category/route.ts`)
@@ -442,11 +787,76 @@ description, and `502 { error }` when the AI call fails — keeping
 
 **Decision log:**
 
+- **`vi.mock` names the exact specifier the route imports** —
+  `"../../../src/ai/suggestCategory"`. The test sits in the same directory as
+  `route.ts`, so the specifier is identical from both files. No `@/` alias was
+  introduced: it would need matching entries in `tsconfig.json` (`paths`) and
+  `vitest.config.ts` (`resolve.alias`) for no gain.
+- **The handler is invoked directly with real `Request` objects** (Node 22
+  provides `Request`/`Response` as globals), so no Next.js runtime is needed and
+  the test runs in the default node environment. T1's include glob already
+  discovers `app/**` tests, so `vitest.config.ts` needed no change.
+- **Replies use `Response.json(body, { status })`, not `NextResponse`** — the
+  Web-standard API keeps the handler directly invocable from the test.
+- **The upstream error message is deliberately *not* forwarded** in the `502`
+  body. A provider error string can carry detail the browser has no business
+  seeing, and the client degrades on any non-`ok` response regardless (3.6). A
+  test pins this: a rejection whose message contains `sk-ant-…` must not appear
+  in the response body. This is a stricter reading than the design's
+  `502 { error: string }`, which does not say *which* string.
+- **Body parsing and body shape are two separate `400` paths.** `request.json()`
+  is wrapped in try/catch for unparseable input (`"{oops"`, an empty body); a
+  parsed-but-wrong body (array, `null`, missing / non-string / blank
+  `description`) falls to the validation guard. Every `400` case asserts
+  `suggestCategory` was **never** called, which is what makes 3.5 real rather
+  than incidental — `mockReset()` in `beforeEach` keeps those assertions honest.
+- **3.7 static check (server side, before any client caller exists):**
+  `grep -rn "ANTHROPIC_API_KEY" app/ src/` returns two matches, both *comments*
+  in `src/ai/suggestCategory.ts` and its test — never a value, and both inside
+  server-only modules, which is the fallback the plan allows. `grep -rn
+  "NEXT_PUBLIC_" app/ src/` returns zero. No module carries `"use client"` yet,
+  and nothing outside `app/api/suggest-category/` and `src/ai/` imports either.
+  The key's only home is the git-ignored `.env.local`. To be re-run at T9.
+
 **Outcome:**
+
+Verified by `task-verifier` (PASS). `npm run typecheck` clean; `npm test`
+93 passed / 0 failed (`app/api/suggest-category/route.test.ts` 14,
+`src/ai/suggestCategory.test.ts` 20, `src/domain/expense.test.ts` 48,
+`src/storage/expenseStorage.test.ts` 11).
+
+- **3.1** — with `src/ai/suggestCategory` mocked by the exact specifier the
+  route imports, `POST { description: "Almuerzo" }` returns `200` with the body
+  exactly `{ category: "Comida" }` and the stub is called once with
+  `"Almuerzo"`; a second case (`"Cine"` → `Ocio`) proves the category is relayed
+  rather than hardcoded, and `toEqual` pins the body to that single field.
+- **3.5 (server half)** — nine `400` cases (blank / empty / missing /
+  non-string / `null` description, array body, `null` body, unparseable
+  `"{oops"`, empty body) each assert both the status **and** that
+  `suggestCategory` was never called, with `mockReset()` per test keeping that
+  negative honest.
+- **3.6 (server half)** — a rejection becomes `502` with a non-empty string
+  `error`; a rejection whose message contains `sk-ant-…` does not appear in the
+  response body; a non-`Error` rejection is handled identically.
+- **3.7** — re-checked statically by the verifier, not taken on trust: zero
+  `NEXT_PUBLIC_`, zero `process.env`, zero `"use client"` in `app/`/`src/`; the
+  two `ANTHROPIC_API_KEY` hits are comments inside server-only modules; the only
+  importer of the AI module is the Route Handler. `.env.local` is git-ignored
+  and untracked. To be re-run at T9, when the first client caller exists.
+
+A verifier probe (deleted, tree confirmed clean) added 21 assertions from unused
+angles: JSON primitives and nested/array bodies as `400` without calling the AI;
+four counter-intuitive relays with decoy body fields ignored; and string /
+object / `undefined` / `null` rejections plus a synchronous throw all mapping to
+a leak-free `502` that never carries a fabricated `category`. All passed.
+
+Deviations from `design.md`, both recorded in the Decision log and accepted:
+replies use the Web-standard `Response.json` instead of `NextResponse`, and the
+`502` body carries a generic message instead of the upstream text.
 
 ### T7 — UI: `ExpenseList` and load-on-mount display
 
-- **Status:** `[ ]`
+- **Status:** `[x]`
 - **Traces to:** 4.2 (UI half: stored expenses shown on open), 4.4, 4.5 (UI
   half: absent/corrupt storage renders an empty state without crashing) →
   Design → UI (`app/page.tsx`, `ExpenseList`)
@@ -511,11 +921,101 @@ data the page renders an empty state instead of crashing.
 
 **Decision log:**
 
+- devDeps added here, not at T1: `jsdom` and `@testing-library/react`. No
+  `@testing-library/jest-dom` (presence is asserted with `getBy…`/`findBy…`,
+  absence with `expect(queryBy…).toBeNull()`) and no
+  `@testing-library/user-event`.
+- **jsdom is opted into per file** with a `// @vitest-environment jsdom`
+  docblock on `ExpenseList.test.tsx` and `page.test.tsx`, so T2–T6 keep running
+  under `node`. Preferred over `environmentMatchGlobs`, which is deprecated.
+- **`vitest.config.ts` gained two settings**, both forced by this first
+  component test: `esbuild.jsx: "automatic"` (tsconfig uses `jsx: "preserve"`
+  for Next.js, which esbuild cannot execute) and `test.globals: true` (RTL's
+  automatic cleanup only runs with it — otherwise the second test in a file
+  renders on top of the first and `getBy…` fails with "found multiple
+  elements"). `test.environment` stays `"node"`.
+- **Storage is seeded through the real `localStorage`**, not a stub or a module
+  mock: under jsdom it exists, and seeding via the actual API is what proves the
+  page really reads storage. `STORAGE_KEY` is imported from
+  `src/storage/expenseStorage` rather than duplicating the literal.
+- **The two `ExpenseList` fixtures deliberately share the category `Comida`.**
+  That is what makes `within(row)` scoping load-bearing: a bare
+  `screen.getByText("Comida")` would be ambiguous and the per-row assertions
+  would be meaningless without it.
+- **Verbatim rendering is asserted negatively too** — the row's text must
+  contain `"25000"` and must *not* contain `"$"`, `"25.000"` or `"25,000"`. A
+  regex-free positive assertion alone would survive a locale formatter that
+  happened to include the digits.
+- **`ExpenseList` is presentational and props-driven**; `app/page.tsx` is the
+  `"use client"` component that owns the data. It seeds state from
+  `loadExpenses()` in a mount `useEffect`, never during render — reading storage
+  during render would crash Next.js server rendering. That is also why the page
+  tests use `findBy…` rather than `getBy…`.
+- The empty-state copy is exported as `EMPTY_STATE_MESSAGE` from the component,
+  but the tests assert the **literal** string `Aún no hay gastos registrados.`
+  on purpose: importing the constant would make the assertion tautological and
+  let a copy change pass silently. T8b/T9 query the same literal.
+- No form yet — T8a owns it.
+
 **Outcome:**
+
+Verified by `task-verifier` (PASS). `npm run typecheck` exits 0; `npm test`
+104 passed / 0 failed across 6 files — `src/components/ExpenseList.test.tsx` (5)
+and `app/page.test.tsx` (6) are the new ones, and 93 + 11 = 104 confirms no
+earlier test was dropped or weakened.
+
+- **4.4** — `ExpenseList` renders one `<li>` per expense with amount, date,
+  description and category, each asserted through `within(row)`. The two
+  fixtures share the category `Comida` on purpose, so the scoping is
+  load-bearing: a bare `screen.getByText("Comida")` would throw on multiple
+  matches. Verbatim rendering is pinned negatively as well
+  (`toContain("25000")` alongside `not.toContain("$")`, `"25.000"`, `"25,000"`),
+  so a locale formatter or currency symbol would fail.
+- **4.2 (UI half)** — with `localStorage` seeded under `STORAGE_KEY` **before**
+  render, the page shows that expense's four values via `await findBy…` and no
+  longer shows the empty state; a two-entry payload yields two `listitem`s.
+  Storage is seeded through the real jsdom API — no stub, no module mock — so
+  the test cannot pass unless `app/page.tsx` really calls `loadExpenses()`.
+- **4.5 (UI half)** — absent key, malformed JSON (`"{oops"`), a non-array
+  payload and an array of junk each render the empty state with zero rows and
+  without throwing.
+
+`tsc --listFiles` confirms both new `.tsx` test files are inside the typecheck
+program.
+
+Two verifier probes (both passed, both deleted):
+
+1. A component throwing from its mount effect makes `render()` throw — proving
+   `expect(() => render(<Home />)).not.toThrow()` in the 4.5 cases is a failable
+   assertion rather than a decorative one.
+2. Storage holding a mix of valid and invalid entries, with two valid rows
+   sharing a category and one description containing the other row's amount as
+   a substring, renders exactly the two valid rows with each field correctly
+   scoped to its own row.
+
+Deviation worth recording: `src/components/ExpenseList.tsx` carries no
+`"use client"` of its own. That is correct — Next propagates the client boundary
+from `app/page.tsx`, which imports it — and it keeps the component purely
+presentational.
+
+Carried into T8a (raised by verification):
+
+- In the 4.5 cases the empty-state message is also present in the page's *first*
+  render (initial state is `[]`), so `findByText(EMPTY_STATE)` alone would not
+  distinguish "load returned `[]`" from "load was never called". The companion
+  `expect(screen.queryByRole("listitem")).toBeNull()` is what makes those tests
+  real — do not "simplify" it away.
+- `app/page.test.tsx` asserts amount/date/category unscoped, which is
+  unambiguous only while the page has a single row. T8a adds a second row, so
+  its new page-level assertions must use `within(row)` scoping.
+- `ExpenseList` renders each field in a bare `<span>` with no label or role, so
+  nothing structurally distinguishes the amount cell from the date cell. 4.4
+  only requires the values be displayed; a later task needing to query a
+  specific field must add that structure.
 
 ### T8a — UI: `ExpenseForm` submit → validate, persist, show in the list
 
-- **Status:** `[ ]`
+- **Status:** `[x]`
 - **Traces to:** 1.1 (UI half: a valid submission is created and stored), 2.2,
   4.1 (wiring `saveExpenses` on create), 4.3 → Design → UI (`ExpenseForm`,
   `app/page.tsx`)
@@ -586,11 +1086,101 @@ offers only the fixed categories, submission runs `createExpense`, persists via
 
 **Decision log:**
 
+- **The `onSubmit: (values) => boolean` contract is the whole design of this
+  task.** The form owns the typed values; only the page knows whether
+  `createExpense`/`saveExpenses` succeeded. Returning `true` is the page's way
+  of telling the form it may clear itself. Both directions are tested with fake
+  handlers (`() => true` clears every input, `() => false` keeps every typed
+  value), which is what T8b's error cases and T9's select-prefill rely on.
+- **`noValidate` on the `<form>` and no `required`/`min` on the fields.** Native
+  constraint validation would block submission of invalid values, the submit
+  handler would never run, and the domain — the single source of truth for
+  validation — would never see them. A test pins this: typing `-5` into a
+  `type="number"` field and submitting still calls `onSubmit`.
+- **`preventDefault()` is asserted directly**, by dispatching a cancelable
+  `submit` event and checking `event.defaultPrevented`. Without it the form
+  would navigate and the "row appears without a reload" case would be
+  meaningless. The dispatch is wrapped in `act()` because it triggers a state
+  update.
+- **The category `<select>` carries an empty-valued placeholder option**, which
+  the 2.2 test filters out before comparing against `[...CATEGORIES]` — so the
+  assertion fails both on a missing category and on an extra one, while still
+  allowing "nothing selected yet" to be representable.
+- **Fields are labelled with `<label htmlFor>`** (`Monto`, `Fecha`,
+  `Descripción`, `Categoría`), giving T8b and T9 a stable `getByLabelText`
+  query. The submit button is `Registrar`.
+- **Amount is passed through as the input's string**, not parsed in the
+  component: T2 already accepts numeric strings, so no parsing logic is
+  duplicated in the UI.
+- **Page-level assertions use `within(row)` scoping** (a helper `expectRowShows`),
+  as T7's verification required once the page tree grew a form and a second row.
+- **`saveExpenses` is called before `setExpenses`** and with the *computed* next
+  array rather than relying on the state update, so what is persisted and what
+  is rendered cannot diverge. T8b wraps this call in try/catch; here a throw
+  would propagate, which no T8a test exercises.
+- The `{ ok: false }` branch returns a bare `false` and does nothing else — the
+  early return is required *here*, not deferred to T8b, because a handler that
+  fell through would infer `boolean | undefined` and fail `npm run typecheck`.
+- Test fakes are typed `vi.fn((_values: ExpenseInput) => …)` so
+  `onSubmit.mock.calls[0][0]` typechecks; an argument-less `vi.fn` gives
+  `calls` the type `[]` and `tsc` rejects the index.
+
 **Outcome:**
+
+Verified by `task-verifier` (PASS). `npm run typecheck` exits 0; `npm test`
+114 passed / 0 failed across 7 files — `src/components/ExpenseForm.test.tsx` (6)
+is new and `app/page.test.tsx` grew from 6 to 10. 104 + 6 + 4 = 114 confirms no
+earlier test was dropped or weakened.
+
+- **2.2** — `within(select).getAllByRole("option")`, mapped to values and
+  filtered of the empty placeholder, is compared with `toEqual([...CATEGORIES])`.
+  The whole-array comparison is what makes it real: it fails on a missing
+  category, an extra one, or a reordering.
+- **1.1 (UI half)** — filling the four fields and submitting persists exactly
+  one entry under `STORAGE_KEY` whose amount/date/description/category match and
+  whose `id` is a non-empty string. `amount: 18500` is asserted as a **number**
+  while the form passes the input's string `"18500"`, so the assertion cannot
+  pass unless `createExpense` really parsed it.
+- **4.1** — persistence is asserted by reading the real jsdom `localStorage`,
+  not by spying on `saveExpenses` or mocking the storage module, so the test
+  fails if the page never writes. A second case seeds one stored expense and
+  checks the list is *appended* to (`[STORED, NEW]`), pinning the
+  `saveExpenses([...current, expense])` wiring.
+- **4.3** — the row is asserted absent before the submit
+  (`queryByText(...).toBeNull()`) and found afterwards in the still-mounted tree
+  via `findByText`, with `rows` length 1 and `expectRowShows(row, …)` scoping
+  every field. A companion test asserts the submit event's default is prevented
+  by dispatching a cancelable `submit` and reading `event.defaultPrevented` —
+  without it "no reload" would be meaningless.
+- The reset contract is tested in both directions (`() => true` clears all four
+  inputs; `() => false` keeps every typed value), and a `-5` amount still
+  reaches `onSubmit`, pinning `noValidate`.
+
+T7's carry-forward was honored: `app/page.test.tsx` now scopes its row
+assertions through an `expectRowShows(row, expense)` helper, strictly stronger
+than the previous unscoped `screen.getByText`.
+
+Two verifier probes (both passed, both deleted): two sequential registrations
+against the same mounted page keep both rows and both stored entries with
+distinct ids — the stale-closure trap in `handleSubmit`, which closes over
+`expenses`, does not fire because each submit re-renders first; and a register →
+unmount → re-render cycle brings the row back from storage, proving what
+`saveExpenses` writes passes `isExpense` on the way back in.
+
+Not covered here, by design: rendering validation messages, `errors`/`saveError`
+state and a throwing `saveExpenses` are T8b; the `npm run dev` manual check is
+deferred to a single pass at T9. The verifier confirmed **no criterion rests on
+that manual step as sole evidence** — the reload leg is covered by the storage
+round-trip test plus the remount probe.
+
+Raised by verification, for T8b: `saveExpenses` throwing from `handleSubmit`
+currently propagates out of the React event handler, and because the throw
+happens *before* `return true`, the form would keep the typed values by accident
+rather than by design. T8b's try/catch makes that deliberate.
 
 ### T8b — UI: validation and save errors are shown without losing input
 
-- **Status:** `[ ]`
+- **Status:** `[x]`
 - **Traces to:** 1.6 (UI half: errors shown per field, entered values
   preserved, nothing stored), 4.6 (UI half: a failed save is reported and input
   is kept) → Design → UI (`ExpenseForm`, `app/page.tsx`), Design → Error
@@ -667,11 +1257,103 @@ list or to storage, and every value the user typed stays in the form.
 
 **Decision log:**
 
+- **Tests assert the `aria-describedby` *link*, never the message copy.** The
+  wording comes from the domain's `ValidationError.message` (T3 only guarantees
+  it is non-empty), so a `describedByText(input)` helper resolves the attribute
+  to its target element and the tests check the text is non-empty. An invalid
+  field must have the link; a valid one must have **no attribute at all**
+  (`toBeNull()`), not an empty string — which is why `describedBy(field)`
+  returns `undefined` and is spread, rather than always emitting the attribute.
+- **The save-error copy is owned by this task**, so it *is* asserted literally:
+  `No se pudo guardar el gasto. Vuelve a intentarlo.` It lives in
+  `app/page.tsx` as `SAVE_ERROR_MESSAGE` and renders in a `role="alert"`
+  paragraph.
+- **`errors` and `saveError` are optional props** (`errors?: ValidationError[]`
+  defaulting to `[]`, `saveError?: string | null` defaulting to `null`). T8a's
+  tests already render `<ExpenseForm>` without them, and required props would
+  have broken `npm run typecheck` on those existing files.
+- **Errors are recomputed from the latest `createExpense` result, never
+  accumulated.** A dedicated test corrects the two bad fields, resubmits, and
+  asserts both `aria-describedby` attributes are gone and the row was added —
+  which fails against an implementation that appends to an error list.
+- **`saveExpenses` failure is simulated by stubbing the browser API, not the
+  module** — `vi.spyOn(Storage.prototype, "setItem")`. Mocking
+  `src/storage/expenseStorage` would replace the very module the page imports,
+  so the test would prove only that the mock works. The spy is installed *after*
+  any `localStorage` seeding (or the seeding itself would throw) and restored in
+  `afterEach` via `vi.restoreAllMocks()`. The test also asserts the spy **was
+  called**, so "no error shown because the save was skipped" cannot pass.
+- **A failed write returns `false` and skips the state append**, so nothing is
+  added to the list *or* to storage and the form keeps every typed value. T8a's
+  verification flagged that a propagating throw would have preserved the values
+  by accident; the try/catch makes it deliberate. A second test proves the error
+  is not sticky: after `mockRestore()`, resubmitting succeeds and the message
+  disappears.
+- **Success clears both `errors` and `saveError` before appending**, which is
+  what that recovery test pins.
+- The 1.6 page-level test seeds one stored expense first, so "stores nothing"
+  is asserted as *storage is unchanged* (`toEqual([STORED])`) rather than the
+  weaker "storage is still absent".
+- **The two failure kinds are mutually exclusive** — added after verification
+  found stale cross-kind state. `requirements.md` 1.6 and 4.6 are both
+  one-directional (`IF x THEN report x`) and say nothing about clearing a
+  *previous, different* error, so this is a design choice recorded here rather
+  than a spec change: mutual exclusion is the only reading under which both
+  criteria stay simultaneously true. A stale "No se pudo guardar el gasto"
+  during a validation rejection reports a write failure whose antecedent never
+  fired, and a stale annotation on a now-valid field misreports 1.6's per-field
+  errors. Implementing it does not extend the contract; it stops the UI
+  contradicting it.
+
 **Outcome:**
+
+Verified by `task-verifier` (PASS, re-confirmed after the cross-kind fix).
+`npm run typecheck` exits 0; `npm test` 125 passed / 0 failed across 7 files —
+`src/components/ExpenseForm.test.tsx` grew 6 → 11 and `app/page.test.tsx`
+10 → 16. 114 + 5 + 6 = 125 confirms no earlier test was dropped or weakened.
+
+- **1.6 (UI half)** — the page-level test submits `amount="-5"` with a
+  whitespace-only description against a store pre-seeded with one expense.
+  `Monto` and `Descripción` each resolve through `aria-describedby` to non-empty
+  text while `Fecha` and `Categoría` have **no attribute at all** (`toBeNull()`,
+  not `""`), all four inputs still hold the typed values, the list stays at one
+  row, and storage is asserted *unchanged* (`toEqual([STORED])`) rather than
+  merely absent. A second test pins that errors are recomputed, not accumulated:
+  correcting both fields and resubmitting removes both links and adds the row.
+- **4.6 (UI half)** — the write is made to fail by stubbing the browser API
+  (`vi.spyOn(Storage.prototype, "setItem")`), *not* the storage module the page
+  imports, so the real `saveExpenses` runs; the test asserts the spy **was
+  called**, so "no error because the save was skipped" cannot pass. The
+  `role="alert"` message is found, no row is added, and all four inputs keep
+  their values. A companion test restores the spy, resubmits, and asserts the
+  alert is gone — the error is not permanent.
+- Design fidelity confirmed: `errors` / `saveError` are optional props with
+  `[]` / `null` defaults (T8a's prop-less renders still typecheck),
+  `describedBy()` returns `undefined` and is spread so the attribute is omitted
+  rather than emptied, `SAVE_ERROR_MESSAGE` lives in `app/page.tsx`, and
+  `noValidate` keeps the domain the single source of validation truth.
+- **The two failure kinds do not leak into each other.** Raised by verification
+  as a stale-state defect and fixed *in* this task rather than carried forward:
+  the `!result.ok` branch also calls `setSaveError(null)` (no write was
+  attempted, so a previous save failure no longer describes anything on screen)
+  and the `catch` branch also calls `setErrors([])` (every field is valid at
+  that point). Two tests pin it, both red before the fix: a validation rejection
+  followed by a corrected field whose *write* then fails leaves no
+  `aria-describedby` on `Monto`; and a save failure followed by a validation
+  rejection shows the field message, asserts the `setItem` spy was **not**
+  called, and finds the alert gone. A verifier probe adds the third combination
+  — a success right after a save failure clears both, adds the row, and resets
+  the form.
+
+A verifier probe (deleted) also submitted the *other* invalid pair — empty
+`Fecha` + empty `Categoría` with valid `Monto`/`Descripción` — and annotated
+exactly those two fields, proving the message mapping is generic
+(`errors.find(e => e.field === field)`) and not special-cased to the fields the
+tests happen to use.
 
 ### T9 — UI: AI suggestion wiring ("Sugerir")
 
-- **Status:** `[ ]`
+- **Status:** `[x]`
 - **Traces to:** 3.2, 3.3, 3.5 (client half: no call on empty description),
   3.6 (client half: failure never blocks manual entry), 3.7 (client half: the
   browser reaches the AI only through `fetch` to the route — first client
@@ -745,7 +1427,102 @@ leave manual registration fully working.
 
 **Decision log:**
 
+- **`type="button"` on "Sugerir" is load-bearing.** Inside a `<form>` the HTML
+  default is `submit`, so an untyped button would register the expense on click
+  and break 3.2 outright. The test asserts `onSubmit` was **not** called.
+- **Every failure is swallowed and the pending flag is cleared in a `finally`**,
+  so no path can leave the button disabled. The 3.6 tests assert
+  `suggestButton().disabled === false` after the failure settles *and* then
+  register an expense manually — the latter is what really proves "does not
+  block registration".
+- **The `fetch` stub resolves a `fetch`-shaped object** (`{ ok, status, json }`)
+  because the implementation checks `res.ok` before reading the payload; a bare
+  `{ category }` would fail the happy path for the wrong reason.
+- **`await screen.findByDisplayValue("Comida")`**, not a synchronous
+  `getByDisplayValue`: the state update lands only after the `fetch` promise
+  resolves, and a synchronous query would fail and raise an `act` warning.
+- **The response payload is type-guarded** (`typeof body.category === "string"`)
+  before it is written into the select. The route already normalizes to the
+  fixed list, but the client should not trust an arbitrary JSON body.
+- **The empty-description guard skips the request entirely** rather than relying
+  on the route's `400`. Both tests assert `fetch` was never called and that the
+  user's current selection is untouched and still editable.
+- **3.7 static re-check (client caller now exists):** `grep -rn "NEXT_PUBLIC_"`
+  and `grep -rn "process.env"` over `app/` and `src/` both return **zero**. The
+  two `ANTHROPIC_API_KEY` hits are comments in `src/ai/suggestCategory.ts` and
+  its test — server-only modules, never a value. The only `"use client"` module
+  is `app/page.tsx`, and **no** client module imports `src/ai/` or `app/api/`:
+  the sole reference from client code is the `fetch("/api/suggest-category")`
+  URL string in `ExpenseForm.tsx`. The browser reaches the AI only over HTTP.
+- **Manual browser pass (also settles T8a's deferred step).** `npm run dev` on
+  port 3001, driven in a real Chrome tab:
+  - Registered `25000 / 2026-07-02 / Almuerzo con cliente / Comida`. The row
+    appeared without a reload and the form cleared. **Reloading the page kept
+    the row** — T8a's owed manual check, now done.
+  - Clicked "Sugerir" with no `ANTHROPIC_API_KEY` configured. The server logged
+    `POST /api/suggest-category 502 in 563ms`, the client swallowed it, the
+    button stayed enabled, and a second expense
+    (`32000 / 2026-07-06 / Taxi al aeropuerto / Transporte`) registered normally
+    — 3.6 confirmed end to end through the real route, not just a stubbed
+    `fetch`.
+  - **Still owed:** one *successful* real suggestion. No `ANTHROPIC_API_KEY` is
+    available in this environment (`.env.local` holds only the commented
+    placeholder), so the 3.1/3.2 happy path is verified against the injected
+    fake client (T5), the mocked module (T6) and the stubbed `fetch` (T9), but
+    never against the live Anthropic API. Set the key in `.env.local` and repeat
+    the walkthrough to close it.
+- **`next dev` rewrote `tsconfig.json`**, as T1's Decision log warned. The diff
+  is reformatting plus `incremental: true` and `.next/types/**/*.ts` added to
+  `include`. Kept rather than reverted — it is Next's own route-type checking,
+  `.next` is git-ignored (so the glob matches nothing on a fresh clone), and
+  `tsconfig.tsbuildinfo` is covered by the `*.tsbuildinfo` rule. `tsc --noEmit`
+  and the full suite are still clean afterwards.
+
 **Outcome:**
+
+Verified by `task-verifier` (PASS). `npm run typecheck` clean and `npm test`
+green at 132/132 across 7 files (`src/components/ExpenseForm.test.tsx` 17,
+`app/page.test.tsx` 17).
+
+- **3.2** — clicking "Sugerir" with `"Almuerzo con cliente"` calls `fetch`
+  exactly once with `/api/suggest-category`, `POST`, and a body parsing back to
+  `{ description: "Almuerzo con cliente" }`; the select then holds `Comida` and
+  `onSubmit` was never called. A verifier probe returning `Ocio` instead
+  confirmed the prefill follows the response rather than a hardcoded value.
+- **3.3** — asserted at page level: after the suggestion lands, changing the
+  select to `Transporte` and submitting stores `{ category: "Transporte" }`
+  under `STORAGE_KEY` and renders `Transporte` in the row, with `Comida` absent
+  from it.
+- **3.5 (client half)** — empty and whitespace-only descriptions never call
+  `fetch`; the user's current selection is untouched and still editable.
+- **3.6 (client half)** — both a rejected `fetch` and a `502` leave the button
+  enabled and let a manual registration through. A probe confirmed the button
+  *is* disabled while the request is in flight, so that assertion observes the
+  `finally` clearing the flag rather than passing vacuously; another probe
+  confirmed a non-`ok` response never overwrites the user's own selection even
+  when its body carries a `category`.
+- **3.7 (client half)** — static re-check re-run by the verifier: zero
+  `NEXT_PUBLIC_` and zero `process.env` in `app/` and `src/`; the only two
+  `ANTHROPIC_API_KEY` hits are comments in server-only modules. The single
+  `"use client"` module, `app/page.tsx`, imports no `src/ai/` and no `app/api/`;
+  the browser's only path to the AI is the `fetch("/api/suggest-category")` URL
+  string.
+
+No earlier test was weakened: the pre-T9 counts (11 in `ExpenseForm.test.tsx`,
+16 in `app/page.test.tsx`) are all still present. The `next dev` rewrite of
+`tsconfig.json` is confirmed harmless — `strict`/`noEmit` untouched, both added
+paths git-ignored, typecheck and suite clean with it in place.
+
+Still owed manually: one *successful* suggestion against the live Anthropic API
+(no key in this environment). The verifier judged that this holds **no T9
+criterion** at INCONCLUSIVE — the question it would answer is whether the live
+provider returns a usable category, which is 3.1, and T9 does not trace to it.
+Logged under Open items as a pre-release check.
+
+Noted, not blocking: the client type-guards `body.category` as a string but does
+not check it against `CATEGORIES`. An off-list value from a compromised route
+would land in the select, render as no selection, and be rejected by the domain
+on submit — no criterion breaks, and 3.4's fallback is the route's job.
 
 ---
 
@@ -771,9 +1548,24 @@ leave manual registration fully working.
   `No se pudo guardar el gasto. Vuelve a intentarlo.`, and per-field validation
   messages are linked with `aria-describedby` (the message text itself comes
   from the domain, so tests assert the link, not the copy).
-- End-to-end verification with a real `ANTHROPIC_API_KEY` is a manual step at
-  T9; set the key in `.env.local` (git-ignored, created in T1) before running
-  `npm run dev`.
+- **Follow-up raised by T4's verification (out of scope for this feature):**
+  `isExpense` in `src/storage/expenseStorage.ts` checks `date` against
+  `/^\d{4}-\d{2}-\d{2}$/` but not calendar validity, so a hand-edited
+  `"2026-02-30"` in `localStorage` would load as a valid `Expense` and render in
+  the list. No criterion is violated (4.5 only demands "no crash, treat as
+  empty", and the domain rejects such dates on the way in), but storage is the
+  trust boundary. Closing it means exporting the domain's calendar check and
+  reusing it in `isExpense` — a one-line change plus its own red test, in a
+  follow-up task rather than a silent edit.
+- **Pre-release check, still owed:** no criterion in this spec has been exercised
+  against the **live** Anthropic API. 3.1 and 3.4 rest on an injected fake client
+  (T5), a mocked module (T6) and a stubbed `fetch` (T9) — a legitimate unit-test
+  boundary, but the feature would ship without a single real round-trip. The T9
+  manual walkthrough covered everything else in a real browser (register → row
+  appears → reload persists; "Sugerir" failing with a real `502` and not
+  blocking manual entry), because no `ANTHROPIC_API_KEY` was available. Set the
+  key in `.env.local` (git-ignored, created in T1), run `npm run dev`, and
+  confirm one successful suggestion end to end.
 - Criterion 3.7 is verified statically twice: at T6 (server side, before any
   client caller exists) and at T9 (first client caller — the browser must reach
   the AI only via `fetch` to the route). Both tasks trace to 3.7. The check
