@@ -23,6 +23,7 @@ npm test            # vitest run
 - **`/planning-tasks`** — asegura el input (spec con `requirements.md` y `design.md` aprobados) y lanza el workflow `converge-tasks` (`.claude/workflows/converge-tasks.js`), que hace toda la planeación: bootstrap si no existe, fan-out de planners read-only por tarea, síntesis, y un único write de `tasks.md`. También sirve para re-planear o auditar tras un cambio de spec. Termina relayando el reporte del workflow y presentando el plan para aprobación del usuario.
 - **`converge-tasks`** (workflow) — el motor de planeación: subagentes `planner` (`.claude/agents/planner.md`) son **read-only** (solo juzgan y proponen); el workflow reconcilia sus propuestas en un paso de síntesis y es el único que escribe `tasks.md`.
 - Con el `tasks.md` aprobado, pasa a la ejecución en TDD, registrando en cada tarea su Decision log y Outcome.
+- **`task-verifier`** (subagente, `.claude/agents/task-verifier.md`) — cierra cada tarea: recibe la carpeta del spec y **un** ID de tarea, lee los criterios a los que traza y el design, corre `npm run typecheck` y `npm test`, y juzga si el código cumple el criterio **y la intención** (detecta tests que pasan en vacío). Es **read-only** sobre el repo: devuelve un veredicto (PASS / FAIL / INCONCLUSIVE) con evidencia y el texto propuesto del Outcome; quien lo invoca es el único que escribe `tasks.md`. Úsalo antes de marcar una tarea como `Done`, o para auditar una que ya lo está.
 
 ## Reglas
 
