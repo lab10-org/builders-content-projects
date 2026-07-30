@@ -25,6 +25,12 @@ npm test            # vitest run
 - Con el `tasks.md` aprobado, pasa a la ejecución en TDD, registrando en cada tarea su Decision log y Outcome.
 - **`task-verifier`** (subagente, `.claude/agents/task-verifier.md`) — cierra cada tarea: recibe la carpeta del spec y **un** ID de tarea, lee los criterios a los que traza y el design, corre `npm run typecheck` y `npm test`, y juzga si el código cumple el criterio **y la intención** (detecta tests que pasan en vacío). Es **read-only** sobre el repo: devuelve un veredicto (PASS / FAIL / INCONCLUSIVE) con evidencia y el texto propuesto del Outcome; quien lo invoca es el único que escribe `tasks.md`. Úsalo antes de marcar una tarea como `Done`, o para auditar una que ya lo está.
 
+## Navegador
+
+Para cualquier automatización de navegador (abrir la app, hacer clic, llenar formularios,
+screenshots, leer la consola) usa el MCP **Playwright** (`mcp__playwright__*`), configurado en
+`.mcp.json`. **No** uses `claude-in-chrome`: está denegado en `.claude/settings.json`.
+
 ## Reglas
 
 - Una feature a la vez. No abrir frentes en paralelo.
