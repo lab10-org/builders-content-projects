@@ -1,0 +1,50 @@
+@import "tailwindcss";
+
+/*
+ * Design tokens transcribed 1:1 from docs/mockups/onboarding.pen.
+ *
+ * Names match the .pen variables exactly so a design change can be traced to a
+ * single line here. That is why some utilities read a little long
+ * (`text-text-muted`, `bg-surface-soft`) — traceability beats brevity.
+ *
+ * Several tokens deliberately share a value: `accent`, `text-secondary` and
+ * `surface-inverse` are all #297373, and `surface`/`text-inverse` are both
+ * white. Keep using the token that matches the *intent* at the call site.
+ */
+@theme {
+  --color-bg: #edeeee;
+  --color-surface: #ffffff;
+  --color-surface-sage: #d6f7e6;
+  --color-surface-inverse: #297373;
+  --color-surface-soft: #e4f3ec;
+
+  --color-text-primary: #39393a;
+  --color-text-secondary: #297373;
+  --color-text-muted: #7c8c8c;
+  --color-text-inverse: #ffffff;
+
+  --color-accent: #297373;
+  --color-border: #d6d9d8;
+  --color-danger: #ff8552;
+  --color-positive: #17936a;
+
+  /* The design's 8/12/16 happen to match Tailwind's defaults, but they are
+     declared anyway so the mapping is explicit rather than a coincidence. */
+  --radius-lg: 8px;
+  --radius-xl: 12px;
+  --radius-2xl: 16px;
+
+  /* The `next/font` variables are defined on <html> (see app/layout.tsx), not
+     on <body>: a theme variable declared on :root can only resolve another
+     custom property that is also present on :root. */
+  --font-heading: var(--font-geist), ui-sans-serif, system-ui, sans-serif;
+  --font-body: var(--font-inter), ui-sans-serif, system-ui, sans-serif;
+  --font-data: var(--font-geist-mono), ui-monospace, monospace;
+}
+
+@layer base {
+  html,
+  body {
+    height: 100%;
+  }
+}
