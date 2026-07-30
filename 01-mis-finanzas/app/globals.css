@@ -28,6 +28,20 @@
   --color-danger: #ff8552;
   --color-positive: #17936a;
 
+  /*
+   * Plan chart: an ordinal ramp for the needs → wants → savings tiers.
+   *
+   * NOT the mockup's values. It pairs #C7EAD9 with #85FFC7, which measure ΔE 2.5
+   * apart under deuteranopia and 9.3 under normal vision — two of the three
+   * stacked segments would be indistinguishable for many readers. These steps
+   * were re-stepped in the same teal family until the ordinal checks passed
+   * (monotone lightness, ΔL ≥ 0.06 per step, light end ≥ 2:1 on white, single
+   * hue), keeping the brand accent as the darkest tier exactly as the design does.
+   */
+  --color-chart-needs: #7cc0a2;
+  --color-chart-wants: #3f9576;
+  --color-chart-savings: #297373;
+
   /* The design's 8/12/16 happen to match Tailwind's defaults, but they are
      declared anyway so the mapping is explicit rather than a coincidence. */
   --radius-lg: 8px;

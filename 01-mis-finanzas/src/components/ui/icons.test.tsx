@@ -14,6 +14,17 @@ const EXPECTED: IconName[] = [
   "arrow-left",
   "arrow-right",
   "plus",
+  "cloud-upload",
+  "folder-open",
+  "file-text",
+  "circle-check",
+  "x",
+  "sparkles",
+  "trending-up",
+  "trending-down",
+  "chart-pie",
+  "triangle-alert",
+  "chevron-down",
 ];
 
 function renderIcon(name: IconName) {

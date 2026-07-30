@@ -2,25 +2,29 @@
 import { render, screen, within } from "@testing-library/react";
 import { describe, expect, it } from "vitest";
 
-import type { Expense } from "../domain/expense";
+import { type Transaction, categoryLabel } from "../domain/transaction";
 import { ExpenseList } from "./ExpenseList";
 
-const LUNCH: Expense = {
+const LUNCH: Transaction = {
   id: "a1",
+  type: "expense",
   amount: 25000,
+  currency: "USD",
   date: "2026-07-02",
   description: "Almuerzo con cliente",
-  category: "Comida",
+  category: "food",
 };
 
 // Shares a category with LUNCH on purpose: a bare screen.getByText("Comida")
 // would be ambiguous, which is what forces the `within(row)` scoping below.
-const COFFEE: Expense = {
+const COFFEE: Transaction = {
   id: "b2",
+  type: "expense",
   amount: 4800,
+  currency: "USD",
   date: "2026-07-03",
   description: "Café de la mañana",
-  category: "Comida",
+  category: "food",
 };
 
 describe("ExpenseList [4.4]", () => {
@@ -43,7 +47,9 @@ describe("ExpenseList [4.4]", () => {
       expect(scope.getByText(String(expense.amount))).toBeDefined();
       expect(scope.getByText(expense.date)).toBeDefined();
       expect(scope.getByText(expense.description)).toBeDefined();
-      expect(scope.getByText(expense.category)).toBeDefined();
+      expect(
+        scope.getByText(categoryLabel(expense.category, "es")),
+      ).toBeDefined();
     }
   });
 

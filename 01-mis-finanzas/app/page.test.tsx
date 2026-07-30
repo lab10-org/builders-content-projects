@@ -2,16 +2,18 @@
 import { fireEvent, render, screen, within } from "@testing-library/react";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 
-import type { Expense } from "../src/domain/expense";
-import { STORAGE_KEY } from "../src/storage/expenseStorage";
+import { type Transaction, categoryLabel } from "../src/domain/transaction";
+import { TRANSACTIONS_KEY } from "../src/storage/transactionStorage";
 import Home from "./page";
 
-const STORED: Expense = {
+const STORED: Transaction = {
   id: "a1",
+  type: "expense",
   amount: 25000,
+  currency: "USD",
   date: "2026-07-02",
   description: "Almuerzo con cliente",
-  category: "Comida",
+  category: "food",
 };
 
 const EMPTY_STATE = "Aún no hay gastos registrados.";
@@ -30,12 +32,14 @@ afterEach(() => {
  * Scopes assertions to a single row. The page grows a form (T8a) and a second
  * row, so unscoped `screen.getByText` would go ambiguous.
  */
-function expectRowShows(row: HTMLElement, expense: Expense) {
+function expectRowShows(row: HTMLElement, expense: Transaction) {
   const scope = within(row);
   expect(scope.getByText(String(expense.amount))).toBeDefined();
   expect(scope.getByText(expense.date)).toBeDefined();
   expect(scope.getByText(expense.description)).toBeDefined();
-  expect(scope.getByText(expense.category)).toBeDefined();
+  expect(
+    scope.getByText(categoryLabel(expense.category, "es")),
+  ).toBeDefined();
 }
 
 function fillForm(values: {
@@ -63,12 +67,12 @@ function submitForm() {
 }
 
 function storedExpenses(): unknown {
-  return JSON.parse(localStorage.getItem(STORAGE_KEY) ?? "null");
+  return JSON.parse(localStorage.getItem(TRANSACTIONS_KEY) ?? "null");
 }
 
 describe("Home — load on mount [4.2]", () => {
   it("shows an expense that was already stored before render", async () => {
-    localStorage.setItem(STORAGE_KEY, JSON.stringify([STORED]));
+    localStorage.setItem(TRANSACTIONS_KEY, JSON.stringify([STORED]));
 
     render(<Home />);
 
@@ -80,7 +84,7 @@ describe("Home — load on mount [4.2]", () => {
 
   it("renders every stored expense", async () => {
     localStorage.setItem(
-      STORAGE_KEY,
+      TRANSACTIONS_KEY,
       JSON.stringify([STORED, { ...STORED, id: "b2", description: "Bus" }]),
     );
 
@@ -103,7 +107,7 @@ describe("Home — unreadable storage [4.5]", () => {
     ["a non-array value", '{"a":1}'],
     ["an array of junk", '[null,"x",42]'],
   ])("renders the empty state without crashing for %s", async (_label, raw) => {
-    localStorage.setItem(STORAGE_KEY, raw);
+    localStorage.setItem(TRANSACTIONS_KEY, raw);
 
     expect(() => render(<Home />)).not.toThrow();
 
@@ -117,7 +121,7 @@ describe("Home — registering a valid expense [1.1, 4.1, 4.3]", () => {
     amount: "18500",
     date: "2026-07-05",
     description: "Mercado del mes",
-    category: "Vivienda",
+    category: "housing",
   };
 
   it("adds the row without a reload and persists it [4.3, 4.1]", async () => {
@@ -136,10 +140,12 @@ describe("Home — registering a valid expense [1.1, 4.1, 4.3]", () => {
     expect(rows).toHaveLength(1);
     expectRowShows(rows[0], {
       id: "ignored",
+      type: "expense",
       amount: 18500,
+      currency: "USD",
       date: NEW_EXPENSE.date,
       description: NEW_EXPENSE.description,
-      category: "Vivienda",
+      category: "housing",
     });
     expect(screen.queryByText(EMPTY_STATE)).toBeNull();
 
@@ -149,14 +155,14 @@ describe("Home — registering a valid expense [1.1, 4.1, 4.3]", () => {
       amount: 18500,
       date: NEW_EXPENSE.date,
       description: NEW_EXPENSE.description,
-      category: "Vivienda",
+      category: "housing",
     });
     expect(typeof stored[0].id).toBe("string");
     expect((stored[0].id as string).length).toBeGreaterThan(0);
   });
 
   it("appends to the expenses already in storage", async () => {
-    localStorage.setItem(STORAGE_KEY, JSON.stringify([STORED]));
+    localStorage.setItem(TRANSACTIONS_KEY, JSON.stringify([STORED]));
     render(<Home />);
     await screen.findByText(STORED.description);
 
@@ -194,7 +200,7 @@ describe("Home — registering a valid expense [1.1, 4.1, 4.3]", () => {
     submitForm();
 
     expect(screen.queryByRole("listitem")).toBeNull();
-    expect(localStorage.getItem(STORAGE_KEY)).toBeNull();
+    expect(localStorage.getItem(TRANSACTIONS_KEY)).toBeNull();
     // The typed values survive, so the user can correct them.
     expect((screen.getByLabelText("Monto") as HTMLInputElement).value).toBe(
       "-5",
@@ -231,11 +237,11 @@ describe("Home — rejected submission [1.6]", () => {
     amount: "-5",
     date: "2026-07-05",
     description: "   ",
-    category: "Vivienda",
+    category: "housing",
   };
 
   it("annotates every invalid field, keeps input, stores nothing", async () => {
-    localStorage.setItem(STORAGE_KEY, JSON.stringify([STORED]));
+    localStorage.setItem(TRANSACTIONS_KEY, JSON.stringify([STORED]));
     render(<Home />);
     await screen.findByText(STORED.description);
 
@@ -296,7 +302,7 @@ describe("Home — failed write [4.6]", () => {
     amount: "18500",
     date: "2026-07-05",
     description: "Mercado del mes",
-    category: "Vivienda",
+    category: "housing",
   };
 
   afterEach(() => {
@@ -371,7 +377,7 @@ describe("Home — the two failure kinds do not leak into each other", () => {
     amount: "18500",
     date: "2026-07-05",
     description: "Mercado del mes",
-    category: "Vivienda",
+    category: "housing",
   };
 
   afterEach(() => {
@@ -438,7 +444,7 @@ describe("Home — the user's category overrides the suggestion [3.3]", () => {
       vi.fn(async () => ({
         ok: true,
         status: 200,
-        json: async () => ({ category: "Comida" }),
+        json: async () => ({ category: "food" }),
       })),
     );
     render(<Home />);
@@ -459,7 +465,7 @@ describe("Home — the user's category overrides the suggestion [3.3]", () => {
 
     // The user disagrees with the suggestion.
     fireEvent.change(screen.getByLabelText("Categoría"), {
-      target: { value: "Transporte" },
+      target: { value: "transport" },
     });
     submitForm();
 
@@ -470,6 +476,6 @@ describe("Home — the user's category overrides the suggestion [3.3]", () => {
 
     const stored = storedExpenses() as Record<string, unknown>[];
     expect(stored).toHaveLength(1);
-    expect(stored[0]).toMatchObject({ category: "Transporte" });
+    expect(stored[0]).toMatchObject({ category: "transport" });
   });
 });

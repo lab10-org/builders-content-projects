@@ -9,14 +9,18 @@ import {
 } from "@testing-library/react";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 
-import { CATEGORIES, type ExpenseInput } from "../domain/expense";
+import {
+  REGISTRATION_CATEGORIES,
+  type TransactionInput,
+  categoryLabel,
+} from "../domain/transaction";
 import { ExpenseForm } from "./ExpenseForm";
 
 const VALUES = {
   amount: "25000",
   date: "2026-07-02",
   description: "Almuerzo con cliente",
-  category: "Comida",
+  category: "food",
 } as const;
 
 function fillValidValues() {
@@ -61,13 +65,42 @@ describe("category options [2.2]", () => {
       .map((option) => (option as HTMLOptionElement).value)
       .filter((value) => value !== ""); // a non-category placeholder is allowed
 
-    expect(values).toEqual([...CATEGORIES]);
+    // Values are the canonical, language-neutral ones that get stored.
+    expect(values).toEqual([...REGISTRATION_CATEGORIES]);
+  });
+
+  it("shows requirement 2.1's Spanish names to the user", () => {
+    render(<ExpenseForm onSubmit={() => true} />);
+
+    const labels = within(screen.getByLabelText("Categoría"))
+      .getAllByRole("option")
+      .map((option) => option.textContent)
+      .filter((label) => label !== "Selecciona una categoría");
+
+    expect(labels).toEqual([
+      "Comida",
+      "Transporte",
+      "Vivienda",
+      "Ocio",
+      "Salud",
+      "Otros",
+    ]);
+  });
+
+  it("does not offer the onboarding-only category", () => {
+    render(<ExpenseForm onSubmit={() => true} />);
+
+    expect(
+      within(screen.getByLabelText("Categoría")).queryByRole("option", {
+        name: categoryLabel("subscriptions", "es"),
+      }),
+    ).toBeNull();
   });
 });
 
 describe("submitting [1.1]", () => {
   it("calls onSubmit once with the four field values as typed", () => {
-    const onSubmit = vi.fn((_values: ExpenseInput) => true);
+    const onSubmit = vi.fn((_values: TransactionInput) => true);
     render(<ExpenseForm onSubmit={onSubmit} />);
 
     fillValidValues();
@@ -78,7 +111,7 @@ describe("submitting [1.1]", () => {
       amount: "25000", // the input's string; T2 accepts numeric strings
       date: "2026-07-02",
       description: "Almuerzo con cliente",
-      category: "Comida",
+      category: "food",
     });
   });
 
@@ -126,7 +159,7 @@ describe("reset contract", () => {
   });
 
   it("submits invalid values too — the domain, not the browser, validates", () => {
-    const onSubmit = vi.fn((_values: ExpenseInput) => false);
+    const onSubmit = vi.fn((_values: TransactionInput) => false);
     render(<ExpenseForm onSubmit={onSubmit} />);
 
     fireEvent.change(screen.getByLabelText("Monto"), {
@@ -248,9 +281,9 @@ describe("AI suggestion [3.2, 3.5, 3.6]", () => {
   });
 
   it("posts the description and prefills the category [3.2]", async () => {
-    const fetchMock = fetchOk("Comida");
+    const fetchMock = fetchOk("food");
     vi.stubGlobal("fetch", fetchMock);
-    const onSubmit = vi.fn((_values: ExpenseInput) => true);
+    const onSubmit = vi.fn((_values: TransactionInput) => true);
     render(<ExpenseForm onSubmit={onSubmit} />);
 
     fireEvent.change(screen.getByLabelText("Descripción"), {
@@ -277,7 +310,7 @@ describe("AI suggestion [3.2, 3.5, 3.6]", () => {
   });
 
   it("leaves the suggested category editable [3.3]", async () => {
-    vi.stubGlobal("fetch", fetchOk("Comida"));
+    vi.stubGlobal("fetch", fetchOk("food"));
     render(<ExpenseForm onSubmit={() => true} />);
 
     fireEvent.change(screen.getByLabelText("Descripción"), {
@@ -287,17 +320,17 @@ describe("AI suggestion [3.2, 3.5, 3.6]", () => {
     await screen.findByDisplayValue("Comida");
 
     fireEvent.change(screen.getByLabelText("Categoría"), {
-      target: { value: "Transporte" },
+      target: { value: "transport" },
     });
 
-    expect(inputs().category.value).toBe("Transporte");
+    expect(inputs().category.value).toBe("transport");
   });
 
   it.each([
     ["empty", ""],
     ["whitespace only", "   "],
   ])("does not call fetch for a %s description [3.5]", async (_label, text) => {
-    const fetchMock = fetchOk("Comida");
+    const fetchMock = fetchOk("food");
     vi.stubGlobal("fetch", fetchMock);
     render(<ExpenseForm onSubmit={() => true} />);
 
@@ -305,17 +338,17 @@ describe("AI suggestion [3.2, 3.5, 3.6]", () => {
       target: { value: text },
     });
     fireEvent.change(screen.getByLabelText("Categoría"), {
-      target: { value: "Salud" },
+      target: { value: "health" },
     });
     fireEvent.click(suggestButton());
 
     expect(fetchMock).not.toHaveBeenCalled();
     // The user's current choice is untouched and still editable.
-    expect(inputs().category.value).toBe("Salud");
+    expect(inputs().category.value).toBe("health");
     fireEvent.change(screen.getByLabelText("Categoría"), {
-      target: { value: "Ocio" },
+      target: { value: "leisure" },
     });
-    expect(inputs().category.value).toBe("Ocio");
+    expect(inputs().category.value).toBe("leisure");
   });
 
   it.each([
@@ -335,7 +368,7 @@ describe("AI suggestion [3.2, 3.5, 3.6]", () => {
     ],
   ])("keeps the form usable after %s [3.6]", async (_label, fetchMock) => {
     vi.stubGlobal("fetch", fetchMock);
-    const onSubmit = vi.fn((_values: ExpenseInput) => true);
+    const onSubmit = vi.fn((_values: TransactionInput) => true);
     render(<ExpenseForm onSubmit={onSubmit} />);
 
     fireEvent.change(screen.getByLabelText("Descripción"), {
@@ -354,14 +387,14 @@ describe("AI suggestion [3.2, 3.5, 3.6]", () => {
       target: { value: "2026-07-02" },
     });
     fireEvent.change(screen.getByLabelText("Categoría"), {
-      target: { value: "Transporte" },
+      target: { value: "transport" },
     });
     submit();
 
     expect(onSubmit).toHaveBeenCalledTimes(1);
     expect(onSubmit.mock.calls[0][0]).toMatchObject({
       amount: "25000",
-      category: "Transporte",
+      category: "transport",
     });
   });
 });

@@ -1,10 +1,12 @@
 import { useState } from "react";
 
 import {
-  CATEGORIES,
-  type ExpenseInput,
+  REGISTRATION_CATEGORIES,
+  type TransactionInput,
   type ValidationError,
-} from "../domain/expense";
+  type ValidationField,
+  categoryLabel,
+} from "../domain/transaction";
 
 const EMPTY_VALUES = {
   amount: "",
@@ -14,7 +16,7 @@ const EMPTY_VALUES = {
 };
 
 /** `aria-describedby` target for a field's validation message. */
-function messageId(field: keyof ExpenseInput): string {
+function messageId(field: ValidationField): string {
   return `${field}-error`;
 }
 
@@ -22,7 +24,7 @@ function messageId(field: keyof ExpenseInput): string {
  * Props-driven: the form owns the typed values, the caller owns the domain.
  *
  * `onSubmit` returns whether the submission was **accepted**. Only the caller
- * knows that (it runs `createExpense` and `saveExpenses`), and only a `true`
+ * knows that (it runs `createTransaction` and `saveTransactions`), and only a `true`
  * result clears the inputs — a rejected submission must keep every value the
  * user typed so they can correct it.
  */
@@ -31,7 +33,7 @@ export function ExpenseForm({
   errors = [],
   saveError = null,
 }: {
-  onSubmit: (values: ExpenseInput) => boolean;
+  onSubmit: (values: TransactionInput) => boolean;
   // Both optional: T8a's tests render <ExpenseForm> without them, and required
   // props would break `npm run typecheck` on those files.
   errors?: ValidationError[];
@@ -75,7 +77,7 @@ export function ExpenseForm({
     }
   }
 
-  function errorFor(field: keyof ExpenseInput): ValidationError | undefined {
+  function errorFor(field: ValidationField): ValidationError | undefined {
     return errors.find((error) => error.field === field);
   }
 
@@ -83,13 +85,13 @@ export function ExpenseForm({
    * The attribute is omitted entirely — not set to `""` — when the field has no
    * error, which is what the tests assert.
    */
-  function describedBy(field: keyof ExpenseInput) {
+  function describedBy(field: ValidationField) {
     return errorFor(field) === undefined
       ? undefined
       : { "aria-describedby": messageId(field) };
   }
 
-  function message(field: keyof ExpenseInput) {
+  function message(field: ValidationField) {
     const error = errorFor(field);
     if (error === undefined) return null;
     return <span id={messageId(field)}>{error.message}</span>;
@@ -159,9 +161,15 @@ export function ExpenseForm({
           {...describedBy("category")}
         >
           <option value="">Selecciona una categoría</option>
-          {CATEGORIES.map((category) => (
+          {/*
+            The option's value is the language-neutral value that gets stored;
+            its text is the Spanish label requirement 2.1 names. Only the six
+            registration categories appear — `subscriptions` exists in the domain
+            but belongs to the onboarding flow.
+          */}
+          {REGISTRATION_CATEGORIES.map((category) => (
             <option key={category} value={category}>
-              {category}
+              {categoryLabel(category, "es")}
             </option>
           ))}
         </select>

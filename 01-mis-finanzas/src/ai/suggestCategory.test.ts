@@ -1,7 +1,10 @@
 import Anthropic from "@anthropic-ai/sdk";
 import { afterEach, describe, expect, it, vi } from "vitest";
 
-import { CATEGORIES } from "../domain/expense";
+import {
+  REGISTRATION_CATEGORIES,
+  categoryLabel,
+} from "../domain/transaction";
 import { normalizeCategory, suggestCategory } from "./suggestCategory";
 
 // The SDK constructor is replaced wholesale so the tests can assert *when* it is
@@ -38,17 +41,23 @@ function textReply(text: string) {
 }
 
 describe("normalizeCategory [3.4]", () => {
-  it("maps an exact match to itself", () => {
-    for (const category of CATEGORIES) {
-      expect(normalizeCategory(category)).toBe(category);
+  it("resolves the Spanish label the prompt offers to its canonical value", () => {
+    for (const value of REGISTRATION_CATEGORIES) {
+      expect(normalizeCategory(categoryLabel(value, "es"))).toBe(value);
+    }
+  });
+
+  it("accepts a canonical value answered verbatim", () => {
+    for (const value of REGISTRATION_CATEGORIES) {
+      expect(normalizeCategory(value)).toBe(value);
     }
   });
 
   it.each([
-    ["  comida ", "Comida"],
-    ["TRANSPORTE", "Transporte"],
-    ["\nVivienda\t", "Vivienda"],
-    ["oCiO", "Ocio"],
+    ["  comida ", "food"],
+    ["TRANSPORTE", "transport"],
+    ["\nVivienda\t", "housing"],
+    ["oCiO", "leisure"],
   ])("folds case and whitespace: %s → %s", (raw, expected) => {
     expect(normalizeCategory(raw)).toBe(expected);
   });
@@ -59,24 +68,34 @@ describe("normalizeCategory [3.4]", () => {
     ["whitespace only", "   "],
     ["a sentence", "La categoría es Comida, creo"],
     ["a near miss", "Comidas"],
-  ])("falls back to Otros for %s", (_label, raw) => {
-    expect(normalizeCategory(raw)).toBe("Otros");
+  ])("falls back to other for %s", (_label, raw) => {
+    expect(normalizeCategory(raw)).toBe("other");
+  });
+
+  it("falls back for a real category the registration form cannot offer", () => {
+    // `subscriptions` exists in the domain but is onboarding-only, so suggesting
+    // it here would hand the form a value it does not list.
+    expect(normalizeCategory("Suscripciones")).toBe("other");
+  });
+
+  it("keeps the fallback displaying as Otros, per requirement 3.4", () => {
+    expect(categoryLabel(normalizeCategory("Groceries"), "es")).toBe("Otros");
   });
 });
 
 describe("suggestCategory [3.1]", () => {
   it("relays the client's answer instead of guessing locally", async () => {
     // Deliberately NOT the intuitive category for this description: an
-    // implementation that classifies locally would answer "Comida" and fail.
+    // implementation that classifies locally would answer "food" and fail.
     const { client, create } = fakeClient(textReply("Transporte"));
 
     const result = await suggestCategory("Almuerzo con cliente", client);
 
-    expect(result).toBe("Transporte");
+    expect(result).toBe("transport");
     expect(create).toHaveBeenCalledTimes(1);
   });
 
-  it("sends a prompt carrying the description and every fixed category", async () => {
+  it("sends a prompt carrying the description and every offered category", async () => {
     const { client, create } = fakeClient(textReply("Comida"));
 
     await suggestCategory("Almuerzo con cliente", client);
@@ -85,34 +104,48 @@ describe("suggestCategory [3.1]", () => {
     const prompt = params.messages.map((message) => message.content).join("\n");
 
     expect(prompt).toContain("Almuerzo con cliente");
-    for (const category of CATEGORIES) {
-      expect(prompt).toContain(category);
+    // Spanish labels, not canonical values: the model is asked in the language
+    // of the screen this serves.
+    for (const value of REGISTRATION_CATEGORIES) {
+      expect(prompt).toContain(categoryLabel(value, "es"));
     }
     expect(params.model).toBe("claude-haiku-4-5");
     expect(params.max_tokens).toBeLessThanOrEqual(32);
   });
 
-  it("falls back to Otros when the model answers off-list [3.4]", async () => {
+  it("does not offer the onboarding-only category", async () => {
+    const { client, create } = fakeClient(textReply("Comida"));
+
+    await suggestCategory("Netflix", client);
+
+    const prompt = create.mock.calls[0][0].messages
+      .map((message) => message.content)
+      .join("\n");
+
+    expect(prompt).not.toContain("Suscripciones");
+  });
+
+  it("falls back to other when the model answers off-list [3.4]", async () => {
     const { client } = fakeClient(textReply("Groceries"));
 
     await expect(suggestCategory("Compra en el super", client)).resolves.toBe(
-      "Otros",
+      "other",
     );
   });
 
-  it("falls back to Otros when the reply has no text block [3.4]", async () => {
+  it("falls back to other when the reply has no text block [3.4]", async () => {
     const { client } = fakeClient({ content: [{ type: "tool_use" }] });
 
     await expect(suggestCategory("Compra en el super", client)).resolves.toBe(
-      "Otros",
+      "other",
     );
   });
 
-  it("falls back to Otros when the reply has no content at all [3.4]", async () => {
+  it("falls back to other when the reply has no content at all [3.4]", async () => {
     const { client } = fakeClient({ content: [] });
 
     await expect(suggestCategory("Compra en el super", client)).resolves.toBe(
-      "Otros",
+      "other",
     );
   });
 
@@ -120,7 +153,7 @@ describe("suggestCategory [3.1]", () => {
     const { client } = fakeClient(textReply("  transporte\n"));
 
     await expect(suggestCategory("Taxi al aeropuerto", client)).resolves.toBe(
-      "Transporte",
+      "transport",
     );
   });
 
@@ -153,14 +186,14 @@ describe("lazy client construction", () => {
         }) as unknown as Anthropic,
     );
 
-    await expect(suggestCategory("Almuerzo")).resolves.toBe("Comida");
+    await expect(suggestCategory("Almuerzo")).resolves.toBe("food");
     expect(Anthropic).toHaveBeenCalledTimes(1);
   });
 
   it("never constructs a client when one is injected", async () => {
     const { client } = fakeClient(textReply("Ocio"));
 
-    await expect(suggestCategory("Cine", client)).resolves.toBe("Ocio");
+    await expect(suggestCategory("Cine", client)).resolves.toBe("leisure");
     expect(Anthropic).not.toHaveBeenCalled();
   });
 });

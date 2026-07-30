@@ -31,22 +31,22 @@ beforeEach(() => {
 
 describe("success [3.1]", () => {
   it("relays the description and returns the resulting category", async () => {
-    vi.mocked(suggestCategory).mockResolvedValue("Comida");
+    vi.mocked(suggestCategory).mockResolvedValue("food");
 
     const response = await POST(jsonRequest({ description: "Almuerzo" }));
 
     expect(response.status).toBe(200);
-    await expect(response.json()).resolves.toEqual({ category: "Comida" });
+    await expect(response.json()).resolves.toEqual({ category: "food" });
     expect(suggestCategory).toHaveBeenCalledTimes(1);
     expect(vi.mocked(suggestCategory).mock.calls[0][0]).toBe("Almuerzo");
   });
 
   it("returns whatever category the AI layer resolved, not a fixed one", async () => {
-    vi.mocked(suggestCategory).mockResolvedValue("Ocio");
+    vi.mocked(suggestCategory).mockResolvedValue("leisure");
 
     const response = await POST(jsonRequest({ description: "Cine" }));
 
-    await expect(response.json()).resolves.toEqual({ category: "Ocio" });
+    await expect(response.json()).resolves.toEqual({ category: "leisure" });
   });
 });
 
