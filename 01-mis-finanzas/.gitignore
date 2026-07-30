@@ -4,3 +4,5 @@ node_modules
 next-env.d.ts
 *.tsbuildinfo
 .playwright-mcp
+test-results
+playwright-report
