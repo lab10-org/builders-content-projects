@@ -4,6 +4,7 @@ import { useState } from "react";
 import { useRouter } from "next/navigation";
 
 import { signUp } from "../../src/auth/actions";
+import { runAuthAction } from "../../src/auth/runAuthAction";
 import { BrandPanel } from "../../src/components/BrandPanel";
 import {
   SignupForm,
@@ -42,11 +43,15 @@ export default function Signup() {
       return;
     }
 
-    const outcome = await signUp({
-      // The normalized email, and the password exactly as typed.
-      email: result.credentials.email,
-      password: result.credentials.password,
-    });
+    // Through `runAuthAction`, as on the sign-in screen: a rejected action must
+    // still say something.
+    const outcome = await runAuthAction(() =>
+      signUp({
+        // The normalized email, and the password exactly as typed.
+        email: result.credentials.email,
+        password: result.credentials.password,
+      }),
+    );
 
     if (!outcome.ok) {
       // The copy comes from the action; this page spells no failure message of

@@ -23,18 +23,28 @@ export async function refreshSession(
 ): Promise<NextResponse> {
   const { url, publishableKey } = readSupabaseEnv();
 
-  const response = NextResponse.next({ request });
   const persist = readsAsPersistent(
     request.cookies.get(PERSIST_COOKIE)?.value,
   );
   const secure = url.startsWith("https://");
 
+  let response = NextResponse.next({ request });
+
   const supabase = createServerClient(url, publishableKey, {
     cookies: {
       getAll: () => request.cookies.getAll(),
       setAll: (list) => {
-        for (const { name, value, options } of list) {
+        for (const { name, value } of list) {
           request.cookies.set(name, value);
+        }
+
+        // Rebuilt here, and not reused from above, because `NextResponse.next`
+        // copies the request headers *at construction time*: a response made
+        // before the loop above would still carry the pre-refresh cookies into
+        // the render, which is the whole thing this function exists to avoid.
+        response = NextResponse.next({ request });
+
+        for (const { name, value, options } of list) {
           response.cookies.set(
             name,
             value,

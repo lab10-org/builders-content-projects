@@ -1,5 +1,5 @@
 // @vitest-environment jsdom
-import { fireEvent, render, screen, waitFor } from "@testing-library/react";
+import { act, fireEvent, render, screen, waitFor } from "@testing-library/react";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 
 import { signIn as signInAction } from "../../src/auth/actions";
@@ -32,7 +32,7 @@ afterEach(() => {
   vi.restoreAllMocks();
 });
 
-function submit({
+async function submit({
   email = "ana@example.com",
   password = "s3cret",
   remember = false,
@@ -44,7 +44,9 @@ function submit({
   if (remember) {
     fireEvent.click(screen.getByRole("checkbox", { name: "Remember me" }));
   }
-  fireEvent.click(screen.getByRole("button", { name: "Sign in" }));
+  await act(async () => {
+    fireEvent.click(screen.getByRole("button", { name: "Sign in" }));
+  });
 }
 
 describe("the brand panel", () => {
@@ -92,7 +94,7 @@ describe("a valid sign-in", () => {
   it("authenticates the normalized email, not the raw input (1.1)", async () => {
     render(<Login />);
 
-    submit({ email: "  Ana@Example.COM " });
+    await submit({ email: "  Ana@Example.COM " });
 
     await waitFor(() => expect(signIn).toHaveBeenCalledTimes(1));
     expect(signIn).toHaveBeenCalledWith({
@@ -105,7 +107,7 @@ describe("a valid sign-in", () => {
   it("continues to the next onboarding step (1.2)", async () => {
     render(<Login />);
 
-    submit();
+    await submit();
 
     await waitFor(() =>
       expect(push).toHaveBeenCalledWith("/onboarding/profile"),
@@ -117,7 +119,7 @@ describe("a valid sign-in", () => {
   it("re-renders from the server so the new session is seen (1.2)", async () => {
     render(<Login />);
 
-    submit();
+    await submit();
 
     await waitFor(() => expect(refresh).toHaveBeenCalledTimes(1));
   });
@@ -127,7 +129,7 @@ describe("a valid sign-in", () => {
     async (remember) => {
       render(<Login />);
 
-      submit({ remember });
+      await submit({ remember });
 
       await waitFor(() =>
         expect(signIn).toHaveBeenCalledWith(
@@ -141,7 +143,7 @@ describe("a valid sign-in", () => {
   it("writes nothing about the user to browser storage", async () => {
     render(<Login />);
 
-    submit();
+    await submit();
 
     await waitFor(() => expect(push).toHaveBeenCalled());
     expect(localStorage.length).toBe(0);
@@ -152,7 +154,7 @@ describe("a valid sign-in", () => {
   it("sends the password to the action and to nothing else", async () => {
     render(<Login />);
 
-    submit({ password: "s3cret-pass" });
+    await submit({ password: "s3cret-pass" });
 
     await waitFor(() => expect(signIn).toHaveBeenCalled());
     expect(signIn.mock.calls[0][0].password).toBe("s3cret-pass");
@@ -162,48 +164,48 @@ describe("a valid sign-in", () => {
 });
 
 describe("an invalid sign-in", () => {
-  it("explains what is wrong with the email", () => {
+  it("explains what is wrong with the email", async () => {
     render(<Login />);
 
-    submit({ email: "not-an-email" });
+    await submit({ email: "not-an-email" });
 
     expect(screen.getByText("Enter a valid email address.")).toBeDefined();
   });
 
-  it("explains a missing password", () => {
+  it("explains a missing password", async () => {
     render(<Login />);
 
-    submit({ password: "" });
+    await submit({ password: "" });
 
     expect(screen.getByText("Enter your password.")).toBeDefined();
   });
 
   // 1.3: a submission the form itself can reject never reaches the service.
-  it("does not contact the auth service at all", () => {
+  it("does not contact the auth service at all", async () => {
     render(<Login />);
 
-    submit({ email: "not-an-email" });
+    await submit({ email: "not-an-email" });
 
     expect(signIn).not.toHaveBeenCalled();
   });
 
-  it("stays on the page", () => {
+  it("stays on the page", async () => {
     render(<Login />);
 
-    submit({ email: "not-an-email" });
+    await submit({ email: "not-an-email" });
 
     expect(push).not.toHaveBeenCalled();
   });
 
-  it("stops annotating a field once it is corrected", () => {
+  it("stops annotating a field once it is corrected", async () => {
     // Errors are recomputed per submission rather than accumulated, so a fixed
     // field must lose its message.
     render(<Login />);
 
-    submit({ email: "not-an-email", password: "" });
+    await submit({ email: "not-an-email", password: "" });
     expect(screen.getByText("Enter a valid email address.")).toBeDefined();
 
-    submit({ email: "ana@example.com", password: "" });
+    await submit({ email: "ana@example.com", password: "" });
 
     expect(screen.queryByText("Enter a valid email address.")).toBeNull();
     expect(screen.getByText("Enter your password.")).toBeDefined();
@@ -223,7 +225,7 @@ describe("when the auth service rejects the sign-in", () => {
     signIn.mockResolvedValue(banner);
     render(<Login />);
 
-    submit();
+    await submit();
 
     const alert = await screen.findByRole("alert");
     expect(alert.textContent).toBe("Invalid email or password.");
@@ -233,7 +235,7 @@ describe("when the auth service rejects the sign-in", () => {
     signIn.mockResolvedValue(banner);
     render(<Login />);
 
-    submit();
+    await submit();
 
     await screen.findByRole("alert");
     expect(push).not.toHaveBeenCalled();
@@ -245,7 +247,7 @@ describe("when the auth service rejects the sign-in", () => {
     signIn.mockResolvedValue(banner);
     render(<Login />);
 
-    submit({ email: "ana@example.com", password: "s3cret" });
+    await submit({ email: "ana@example.com", password: "s3cret" });
 
     await screen.findByRole("alert");
     expect(screen.getByLabelText("Email").getAttribute("value")).toBe(
@@ -267,7 +269,7 @@ describe("when the auth service rejects the sign-in", () => {
     });
     render(<Login />);
 
-    submit();
+    await submit();
 
     await screen.findByText("Password must be at least 6 characters.");
     expect(
@@ -281,7 +283,7 @@ describe("when the auth service rejects the sign-in", () => {
     signIn.mockResolvedValue(banner);
     render(<Login />);
 
-    submit();
+    await submit();
     await screen.findByRole("alert");
 
     let resolve: (value: { ok: true }) => void = () => {};
@@ -290,9 +292,14 @@ describe("when the auth service rejects the sign-in", () => {
         resolve = r;
       }),
     );
-    submit();
+    await submit();
 
     expect(screen.queryByRole("alert")).toBeNull();
-    resolve({ ok: true });
+
+    // Settled inside `act`, so the state the resolution produces — the form's
+    // in-flight guard coming off, the navigation — lands before the test ends.
+    await act(async () => {
+      resolve({ ok: true });
+    });
   });
 });

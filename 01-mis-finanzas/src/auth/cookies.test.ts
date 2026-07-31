@@ -79,7 +79,7 @@ describe("readsAsPersistent", () => {
 
 describe("persistCookie", () => {
   it("records a persistent choice with its own lifetime", () => {
-    const cookie = persistCookie(true);
+    const cookie = persistCookie(true, false);
 
     expect(cookie.name).toBe(PERSIST_COOKIE);
     expect(cookie.value).toBe("1");
@@ -87,7 +87,7 @@ describe("persistCookie", () => {
   });
 
   it("records a browser-session choice with no lifetime", () => {
-    const cookie = persistCookie(false);
+    const cookie = persistCookie(false, false);
 
     expect(cookie.value).toBe("0");
     expect(cookie.options).not.toHaveProperty("maxAge");
@@ -98,6 +98,18 @@ describe("persistCookie", () => {
   // scoped anywhere narrower would read as absent there — silently downgrading
   // a remembered session.
   it.each([true, false])("scopes the cookie to the whole site (%s)", (persist) => {
-    expect(persistCookie(persist).options.path).toBe("/");
+    expect(persistCookie(persist, false).options.path).toBe("/");
+  });
+
+  // The marker decides the lifetime the middleware gives every refreshed token,
+  // so anything that could write it could promote a session the user chose to
+  // end with the tab. Nothing in the browser reads it, so nothing in the browser
+  // may.
+  it.each([true, false])("keeps the choice out of reach of scripts (%s)", (persist) => {
+    expect(persistCookie(persist, false).options.httpOnly).toBe(true);
+  });
+
+  it.each([true, false])("follows the connection's own scheme (%s)", (secure) => {
+    expect(persistCookie(true, secure).options.secure).toBe(secure);
   });
 });

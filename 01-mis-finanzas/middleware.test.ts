@@ -53,7 +53,8 @@ describe("the matcher", () => {
   );
 
   // Refreshing a token to serve a chunk of JavaScript would be work per asset,
-  // on requests no session is ever read from.
+  // on requests no session is ever read from — and `getUser()` is a round trip
+  // to the auth service, not a local decode.
   it.each([
     "/_next/static/chunk.js",
     "/_next/image",
@@ -61,5 +62,23 @@ describe("the matcher", () => {
     "/api/suggest-category",
   ])("skips %s", (path) => {
     expect(matches(path)).toBe(false);
+  });
+
+  // Anything served straight out of `public/` has no prefix to exclude it by,
+  // so the extension is the only thing that can.
+  it.each([
+    "/logo.svg",
+    "/images/hero.png",
+    "/fonts/inter.woff2",
+    "/manifest.json",
+    "/robots.txt",
+    "/sitemap.xml",
+  ])("skips the static asset %s", (path) => {
+    expect(matches(path)).toBe(false);
+  });
+
+  // The extension rule must not swallow a route that merely has a dot in it.
+  it("still runs on a route whose segment contains a dot", () => {
+    expect(matches("/users/ana.perez")).toBe(true);
   });
 });

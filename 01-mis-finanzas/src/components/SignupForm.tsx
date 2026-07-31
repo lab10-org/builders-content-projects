@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { type FormEvent, useState } from "react";
 import Link from "next/link";
 
 import type { CredentialsError, CredentialsField } from "../domain/credentials";
@@ -23,17 +23,33 @@ const EMPTY = { email: "", password: "" };
  * owns validation, the call and navigation. It performs no validation of its
  * own and never clears itself — a failed registration must leave the user
  * looking at what they typed.
+ *
+ * It awaits `onSubmit` for the same reason `LoginForm` does: registering is a
+ * round trip, and a second click during it would send a second registration.
  */
 export function SignupForm({
   onSubmit,
   errors = [],
   saveError = null,
 }: {
-  onSubmit: (submission: SignupSubmission) => void;
+  onSubmit: (submission: SignupSubmission) => void | Promise<void>;
   errors?: CredentialsError[];
   saveError?: string | null;
 }) {
   const [values, setValues] = useState(EMPTY);
+  const [pending, setPending] = useState(false);
+
+  async function handleSubmit(event: FormEvent<HTMLFormElement>) {
+    event.preventDefault();
+    if (pending) return;
+
+    setPending(true);
+    try {
+      await onSubmit({ ...values });
+    } finally {
+      setPending(false);
+    }
+  }
 
   function update(field: keyof typeof EMPTY, value: string) {
     setValues((current) => ({ ...current, [field]: value }));
@@ -50,10 +66,7 @@ export function SignupForm({
       // invalid values, or `validateNewCredentials` would never see them.
       noValidate
       className="flex w-full max-w-[420px] flex-col gap-6"
-      onSubmit={(event) => {
-        event.preventDefault();
-        onSubmit({ ...values });
-      }}
+      onSubmit={handleSubmit}
     >
       <header className="flex flex-col gap-2">
         <h1 className="font-heading text-[30px] font-semibold text-text-primary">
@@ -96,7 +109,7 @@ export function SignupForm({
         </p>
       )}
 
-      <Button type="submit" variant="block">
+      <Button type="submit" variant="block" disabled={pending}>
         Create account
       </Button>
 

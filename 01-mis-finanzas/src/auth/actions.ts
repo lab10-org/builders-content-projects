@@ -4,7 +4,7 @@ import {
   validateCredentials,
   validateNewCredentials,
 } from "../domain/credentials";
-import { type AuthFailure, mapAuthError } from "./errors";
+import { AUTH_MESSAGES, type AuthFailure, mapAuthError } from "./errors";
 import { createAuthClient } from "./serverClient";
 
 /**
@@ -30,8 +30,8 @@ function fieldFailure(error: {
  * is not being told. A recognized failure is already fully described by its
  * copy; logging it too would be noise around the one line that matters.
  */
-function toFailure(error: unknown, screen: "sign-in" | "sign-up"): AuthResult {
-  const { failure, recognized } = mapAuthError(error, screen);
+function toFailure(error: unknown): AuthResult {
+  const { failure, recognized } = mapAuthError(error);
   if (!recognized) {
     // The error only — never the credentials, which are not in scope here.
     console.error("[auth] unrecognized failure", error);
@@ -72,11 +72,11 @@ export async function signIn({
       password: validated.credentials.password,
     });
 
-    if (error) return toFailure(error, "sign-in");
+    if (error) return toFailure(error);
   } catch (thrown) {
     // A transport failure arrives as a rejection rather than a returned error;
     // both are the same event to the user, so both go through one mapping.
-    return toFailure(thrown, "sign-in");
+    return toFailure(thrown);
   }
 
   return { ok: true };
@@ -92,8 +92,9 @@ export async function signIn({
  * The session check is the guard for the day `enable_confirmations` is turned
  * on in `supabase/config.toml`. The service would then return a user with no
  * session, and reporting `ok` would navigate an unauthenticated visitor into
- * the app. Treating it as an unrecognized failure keeps them out and puts the
- * reason in the server log, where the person who flipped the flag will find it.
+ * the app. It keeps them out — but with the one instruction that actually gets
+ * them in, because "something went wrong" would send them round a loop of
+ * retrying an account that already exists.
  */
 export async function signUp({
   email,
@@ -113,16 +114,21 @@ export async function signUp({
       password: validated.credentials.password,
     });
 
-    if (error) return toFailure(error, "sign-up");
+    if (error) return toFailure(error);
 
     if (!data?.session) {
-      return toFailure(
-        new Error("Sign-up returned no session — is email confirmation on?"),
-        "sign-up",
-      );
+      // Not routed through `toFailure`: this is not an error the service
+      // reported, it is a configuration the operator chose, so it gets its own
+      // copy — and still its own log line, since the flag was likely flipped by
+      // someone who did not expect this screen to change.
+      console.error("[auth] sign-up returned no session — email confirmation?");
+      return {
+        ok: false,
+        failure: { kind: "banner", message: AUTH_MESSAGES.confirmEmail },
+      };
     }
   } catch (thrown) {
-    return toFailure(thrown, "sign-up");
+    return toFailure(thrown);
   }
 
   return { ok: true };

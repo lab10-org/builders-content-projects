@@ -50,7 +50,10 @@ export function readsAsPersistent(value: string | undefined): boolean {
 }
 
 /** The persistence choice itself, shaped for whatever cookie store writes it. */
-export function persistCookie(persist: boolean): {
+export function persistCookie(
+  persist: boolean,
+  secure: boolean,
+): {
   name: string;
   value: string;
   options: CookieOptions;
@@ -58,9 +61,22 @@ export function persistCookie(persist: boolean): {
   return {
     name: PERSIST_COOKIE,
     value: persist ? "1" : "0",
-    // `path` is not cosmetic: the middleware reads this cookie on every route,
-    // and a narrower scope would read as absent there — silently downgrading a
-    // remembered session on the first navigation.
-    options: applyPersistence({ path: "/", sameSite: "lax" }, persist),
+    options: applyPersistence(
+      {
+        // `path` is not cosmetic: the middleware reads this cookie on every
+        // route, and a narrower scope would read as absent there — silently
+        // downgrading a remembered session on the first navigation.
+        path: "/",
+        sameSite: "lax",
+        // Locked down exactly like the session cookies it governs. Only the
+        // server reads this marker, and the middleware treats it as the
+        // authoritative lifetime for every refreshed token — so a script that
+        // could write it could promote a deliberately-ephemeral session to 400
+        // days, which is the promotion the marker exists to prevent.
+        httpOnly: true,
+        secure,
+      },
+      persist,
+    ),
   };
 }

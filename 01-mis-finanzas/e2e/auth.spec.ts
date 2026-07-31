@@ -7,10 +7,18 @@ import { expect, test, type Page } from "@playwright/test";
  * Nothing is stubbed here: auth is the feature under test, so every case talks
  * to the real service on http://127.0.0.1:54321. Each test starts from
  * Playwright's default fresh context, which is the plan's "no session carries
- * over" precondition — no extra setup is needed or allowed.
+ * over" precondition.
+ *
+ * The one thing the suite does need in place is the account below, and it comes
+ * from `supabase/seed.sql` rather than from a step in here — so `supabase db
+ * reset` restores the precondition instead of quietly removing it.
  */
 
-/** The account the plan seeds in `auth.users` of the local stack. */
+/**
+ * The account `supabase/seed.sql` creates, so `supabase db reset` is all the
+ * setup Cases 2 and 3 need. Its password is deliberately not used here: one
+ * case signs in with the wrong one, the other never signs in at all.
+ */
 const SEEDED_EMAIL = "smoke-2026073001@example.com";
 
 /**
@@ -35,6 +43,15 @@ async function scriptVisibleCookies(page: Page): Promise<string[]> {
       .map((entry) => entry.trim().split("=")[0])
       .filter(Boolean),
   );
+}
+
+/**
+ * Every cookie name the browser holds, `httpOnly` ones included — read from the
+ * context rather than the page, which is the only way to see them.
+ */
+async function storedCookies(page: Page): Promise<string[]> {
+  const cookies = await page.context().cookies();
+  return cookies.map(({ name }) => name);
 }
 
 // Case 1 — Create an account from the sign-in screen (happy path)
@@ -81,11 +98,14 @@ test("registers a new account from the sign-in screen and lands in the app", asy
   expect(storageKeys.local).toEqual([]);
   expect(storageKeys.session).toEqual([]);
 
-  // The persistence marker is readable, the session token is not: it is
-  // httpOnly, so no `sb-` cookie reaches `document.cookie` (3.1).
-  const cookieNames = await scriptVisibleCookies(page);
-  expect(cookieNames).toContain("mis-finanzas:persist");
-  expect(cookieNames.filter((name) => name.startsWith("sb-"))).toEqual([]);
+  // The persistence marker was recorded (3.1) — checked against the stored
+  // cookies, because it is `httpOnly` like the session itself.
+  expect(await storedCookies(page)).toContain("mis-finanzas:persist");
+
+  // And nothing the session is made of reaches a script (3.1).
+  const scriptVisible = await scriptVisibleCookies(page);
+  expect(scriptVisible.filter((name) => name.startsWith("sb-"))).toEqual([]);
+  expect(scriptVisible).not.toContain("mis-finanzas:persist");
 });
 
 // Case 2 — Sign in with the wrong password (failure path)
@@ -114,16 +134,15 @@ test("rejects a wrong password without revealing anything or signing in", async 
 
   // And no session was established.
   //
-  // The persistence marker is the falsifiable check: it is written only by an
-  // establishing sign-in (`serverClient.ts` `setAll`, guarded by `establishing`)
-  // and never by the middleware's refresh, so its absence really does mean no
-  // session came into existence. Asserting instead that no `sb-` cookie is
-  // script-visible would prove nothing here — those cookies are set `httpOnly`
-  // unconditionally, so an app that *did* wrongly sign the user in would pass
-  // that line too. It is kept below only as a restatement of that guarantee.
-  const cookieNames = await scriptVisibleCookies(page);
-  expect(cookieNames).not.toContain("mis-finanzas:persist");
-  expect(cookieNames.filter((name) => name.startsWith("sb-"))).toEqual([]);
+  // The persistence marker is the falsifiable check: it is written only by the
+  // Server Action that establishes a session and never by the middleware's
+  // refresh, so its absence really does mean no session came into existence.
+  // Read from the context, since it is `httpOnly`: asserting on what scripts can
+  // see would prove nothing, because an app that *did* wrongly sign the user in
+  // would show nothing there either.
+  const stored = await storedCookies(page);
+  expect(stored).not.toContain("mis-finanzas:persist");
+  expect(stored.filter((name) => name.startsWith("sb-"))).toEqual([]);
 });
 
 // Case 3 — Register an email that already has an account (failure path)

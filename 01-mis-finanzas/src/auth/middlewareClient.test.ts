@@ -51,6 +51,29 @@ function adapter() {
   return options.cookies;
 }
 
+/**
+ * Makes the mocked SDK write cookies *during* the refresh, which is when the
+ * real one writes them.
+ *
+ * Calling `setAll` after `refreshSession` has returned would test a different
+ * function: the response is rebuilt inside `setAll`, so a reference captured
+ * beforehand is by definition the stale one — exactly the object the route
+ * would have rendered against before this was fixed.
+ */
+function refreshWrites(list: { name: string; value: string; options: object }[]) {
+  getUser.mockImplementation(async () => {
+    adapter().setAll(list);
+    return { data: { user: { id: "u1" } }, error: null };
+  });
+}
+
+const REFRESHED = [{ name: TOKEN, value: "refreshed", options: {} }];
+
+/** The request cookies `NextResponse.next` carried onto the response. */
+function forwardedCookies(response: { headers: Headers }) {
+  return response.headers.get("x-middleware-request-cookie") ?? "";
+}
+
 describe("refreshSession", () => {
   it("builds the client from the configured connection", async () => {
     await refreshSession(request());
@@ -79,20 +102,34 @@ describe("refreshSession", () => {
   });
 
   it("writes a refreshed cookie onto both the request and the response", async () => {
-    const req = request();
+    const req = request({ [TOKEN]: "expired" });
+    refreshWrites(REFRESHED);
 
     const response = await refreshSession(req);
-    adapter().setAll([{ name: TOKEN, value: "refreshed", options: {} }]);
 
     expect(req.cookies.get(TOKEN)?.value).toBe("refreshed");
     expect(response.cookies.get(TOKEN)?.value).toBe("refreshed");
   });
 
-  it("keeps a remembered session persistent across the refresh (3.7)", async () => {
-    const req = request({ [PERSIST_COOKIE]: "1" });
+  // The assertion the request-side write exists for. `NextResponse.next` copies
+  // the request headers when it is constructed, so a response built before the
+  // refresh carries the *expired* token into the render — the user is signed out
+  // for one navigation and signed in on the next. Asserting on the NextRequest
+  // alone cannot catch that: the object is mutated either way.
+  it("forwards the refreshed cookie to the route about to render (3.6)", async () => {
+    const req = request({ [TOKEN]: "expired" });
+    refreshWrites(REFRESHED);
 
     const response = await refreshSession(req);
-    adapter().setAll([{ name: TOKEN, value: "refreshed", options: {} }]);
+
+    expect(forwardedCookies(response)).toContain(`${TOKEN}=refreshed`);
+    expect(forwardedCookies(response)).not.toContain("expired");
+  });
+
+  it("keeps a remembered session persistent across the refresh (3.7)", async () => {
+    refreshWrites(REFRESHED);
+
+    const response = await refreshSession(request({ [PERSIST_COOKIE]: "1" }));
 
     expect(response.cookies.get(TOKEN)?.maxAge).toBe(PERSIST_MAX_AGE);
   });
@@ -100,10 +137,9 @@ describe("refreshSession", () => {
   it.each<Record<string, string>>([{ [PERSIST_COOKIE]: "0" }, {}])(
     "keeps a browser session mortal across the refresh (%o) (3.7)",
     async (cookies) => {
-      const req = request(cookies);
+      refreshWrites(REFRESHED);
 
-      const response = await refreshSession(req);
-      adapter().setAll([{ name: TOKEN, value: "refreshed", options: {} }]);
+      const response = await refreshSession(request(cookies));
 
       const written = response.cookies.get(TOKEN);
       expect(written?.maxAge).toBeUndefined();
@@ -114,10 +150,9 @@ describe("refreshSession", () => {
   // The choice is the sign-in's to make. A refresh that rewrote it could
   // promote a browser session to a persistent one behind the user's back.
   it("never rewrites the persistence marker itself (3.7)", async () => {
-    const req = request({ [PERSIST_COOKIE]: "1" });
+    refreshWrites(REFRESHED);
 
-    const response = await refreshSession(req);
-    adapter().setAll([{ name: TOKEN, value: "refreshed", options: {} }]);
+    const response = await refreshSession(request({ [PERSIST_COOKIE]: "1" }));
 
     expect(response.cookies.get(PERSIST_COOKIE)).toBeUndefined();
   });
@@ -125,18 +160,24 @@ describe("refreshSession", () => {
 
 describe("refreshSession — a session that cannot be refreshed (3.8)", () => {
   it("still returns a usable response when the SDK reports an unusable token", async () => {
-    getUser.mockResolvedValue({
-      data: { user: null },
-      error: { code: "refresh_token_not_found" },
-    });
-    const req = request({ [TOKEN]: "stale" });
-
-    const response = await refreshSession(req);
     // The SDK clears the session by writing an empty value; that clearing must
     // survive onto the response, so the user is simply signed out.
-    adapter().setAll([{ name: TOKEN, value: "", options: {} }]);
+    getUser.mockImplementation(async () => {
+      adapter().setAll([{ name: TOKEN, value: "", options: {} }]);
+      return { data: { user: null }, error: { code: "refresh_token_not_found" } };
+    });
+
+    const response = await refreshSession(request({ [TOKEN]: "stale" }));
 
     expect(response.cookies.get(TOKEN)?.value).toBe("");
+  });
+
+  // Nothing was refreshed, so there is nothing to forward — but the request
+  // still has to reach its route.
+  it("returns a usable response when the SDK writes nothing at all", async () => {
+    const response = await refreshSession(request({ [TOKEN]: "still-valid" }));
+
+    expect(forwardedCookies(response)).toContain(`${TOKEN}=still-valid`);
   });
 
   it("does not throw when the refresh call itself rejects", async () => {

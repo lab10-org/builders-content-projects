@@ -1,13 +1,13 @@
 // @vitest-environment jsdom
-import { fireEvent, render, screen } from "@testing-library/react";
+import { act, fireEvent, render, screen } from "@testing-library/react";
 import { beforeEach, describe, expect, it, vi } from "vitest";
 
 import { SignupForm } from "./SignupForm";
 
-const onSubmit = vi.fn();
+const onSubmit = vi.fn<(submission: unknown) => void | Promise<void>>();
 
 beforeEach(() => {
-  onSubmit.mockClear();
+  onSubmit.mockReset();
 });
 
 function fill({
@@ -20,8 +20,11 @@ function fill({
   });
 }
 
-function submit() {
-  fireEvent.click(screen.getByRole("button", { name: "Create account" }));
+/** Awaited, because the form awaits `onSubmit` — see `LoginForm.test.tsx`. */
+async function submit() {
+  await act(async () => {
+    fireEvent.click(screen.getByRole("button", { name: "Create account" }));
+  });
 }
 
 describe("rendering", () => {
@@ -58,11 +61,11 @@ describe("rendering", () => {
 });
 
 describe("submitting", () => {
-  it("reports the typed values exactly as typed", () => {
+  it("reports the typed values exactly as typed", async () => {
     render(<SignupForm onSubmit={onSubmit} />);
 
     fill({ email: "  Ana@Example.COM ", password: " s3cret " });
-    submit();
+    await submit();
 
     // The component normalizes nothing — that is the domain layer's call. The
     // email arrives without its surrounding spaces only because
@@ -76,32 +79,34 @@ describe("submitting", () => {
     });
   });
 
-  it("does not reload the page", () => {
+  it("does not reload the page", async () => {
     render(<SignupForm onSubmit={onSubmit} />);
     fill();
 
     const event = new Event("submit", { bubbles: true, cancelable: true });
-    screen.getByRole("button", { name: "Create account" }).closest("form")!
-      .dispatchEvent(event);
+    await act(async () => {
+      screen.getByRole("button", { name: "Create account" }).closest("form")!
+        .dispatchEvent(event);
+    });
 
     expect(event.defaultPrevented).toBe(true);
   });
 
   // noValidate, mirroring LoginForm: the browser must not block the submission,
   // or validateNewCredentials would never get to report on it.
-  it("submits empty fields rather than letting the browser block them", () => {
+  it("submits empty fields rather than letting the browser block them", async () => {
     render(<SignupForm onSubmit={onSubmit} />);
 
-    submit();
+    await submit();
 
     expect(onSubmit).toHaveBeenCalledWith({ email: "", password: "" });
   });
 
-  it("keeps what the user typed after a submit", () => {
+  it("keeps what the user typed after a submit", async () => {
     render(<SignupForm onSubmit={onSubmit} />);
 
     fill({ email: "ana@example.com", password: "s3cret-pass" });
-    submit();
+    await submit();
 
     expect(screen.getByLabelText("Email").getAttribute("value")).toBe(
       "ana@example.com",
@@ -109,6 +114,37 @@ describe("submitting", () => {
     expect(screen.getByLabelText("Password").getAttribute("value")).toBe(
       "s3cret-pass",
     );
+  });
+});
+
+// Registering twice would send a second `signUp` for the same address; the copy
+// the user then gets is "already registered", for an account they just made.
+describe("a submission in flight", () => {
+  it("ignores a second submit until the first has finished", async () => {
+    let finish = () => {};
+    const settled = new Promise<void>((resolve) => {
+      finish = resolve;
+    });
+    onSubmit.mockReturnValue(settled);
+    render(<SignupForm onSubmit={onSubmit} />);
+
+    await submit();
+    await submit();
+
+    expect(onSubmit).toHaveBeenCalledTimes(1);
+    expect(
+      screen.getByRole<HTMLButtonElement>("button", { name: "Create account" })
+        .disabled,
+    ).toBe(true);
+
+    await act(async () => {
+      finish();
+      await settled;
+    });
+    expect(
+      screen.getByRole<HTMLButtonElement>("button", { name: "Create account" })
+        .disabled,
+    ).toBe(false);
   });
 });
 

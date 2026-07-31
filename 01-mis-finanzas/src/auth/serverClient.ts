@@ -1,34 +1,23 @@
 import { createServerClient } from "@supabase/ssr";
 import { cookies } from "next/headers";
 
-import {
-  PERSIST_COOKIE,
-  applyPersistence,
-  persistCookie,
-  readsAsPersistent,
-} from "./cookies";
+import { applyPersistence, persistCookie } from "./cookies";
 import { readSupabaseEnv } from "./env";
 
 /**
  * The one Supabase client the Server Actions use, wired to the request's
  * cookie store.
  *
- * `persist` is passed only when a sign-in or sign-up is *establishing* a
- * session — it is the "Remember me" answer, and it is recorded so later
- * refreshes can honour it. Omitted, the client is merely *serving* an existing
- * session: it then reads the recorded choice and leaves it alone, because
- * overwriting it here would silently re-decide something the user decided.
+ * Every caller is *establishing* a session — sign-in and sign-up are the only
+ * two — so `persist` is the "Remember me" answer, applied to each session
+ * cookie and then recorded so later refreshes in the middleware can honour it.
+ * There is no serving-an-existing-session mode here on purpose: the middleware
+ * is where an existing session is read, and inventing a second branch for a
+ * caller that does not exist would only be a guess at what it will need.
  */
-export async function createAuthClient(persist?: boolean) {
+export async function createAuthClient(persist: boolean) {
   const { url, publishableKey } = readSupabaseEnv();
   const store = await cookies();
-
-  const establishing = persist !== undefined;
-  const shouldPersist = establishing
-    ? persist
-    : readsAsPersistent(
-        store.getAll().find(({ name }) => name === PERSIST_COOKIE)?.value,
-      );
 
   // `secure` follows the configured URL rather than NODE_ENV: the local stack
   // is plain http on 127.0.0.1, and a Secure cookie there is simply dropped.
@@ -52,15 +41,13 @@ export async function createAuthClient(persist?: boolean) {
                 path: "/",
                 secure,
               },
-              shouldPersist,
+              persist,
             ),
           );
         }
 
-        if (establishing) {
-          const marker = persistCookie(shouldPersist);
-          store.set(marker.name, marker.value, marker.options);
-        }
+        const marker = persistCookie(persist, secure);
+        store.set(marker.name, marker.value, marker.options);
       },
     },
   });

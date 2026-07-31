@@ -118,41 +118,17 @@ describe("createAuthClient", () => {
     );
   });
 
-  // Called with no argument, the client is not establishing a session — it is
-  // serving one. It must not overwrite a choice the user already made.
-  it("preserves a remembered choice when no persistence is given", async () => {
-    store.entries = [{ name: PERSIST_COOKIE, value: "1" }];
-
-    await createAuthClient();
+  // The marker governs the lifetime of every cookie the middleware later
+  // refreshes, so a script that could write it could promote an ephemeral
+  // session to 400 days.
+  it("locks the recorded choice down exactly like the session it governs", async () => {
+    await createAuthClient(false);
     writeSessionCookie();
 
-    expect(written("sb-127-auth-token")).toMatchObject({
-      maxAge: PERSIST_MAX_AGE,
+    expect(written(PERSIST_COOKIE)).toMatchObject({
+      httpOnly: true,
+      secure: false,
+      path: "/",
     });
-    expect(store.set).not.toHaveBeenCalledWith(
-      PERSIST_COOKIE,
-      "0",
-      expect.anything(),
-    );
-  });
-
-  it("defaults to a browser session when no choice was ever recorded", async () => {
-    await createAuthClient();
-    writeSessionCookie();
-
-    const options = written("sb-127-auth-token");
-    expect(options).not.toHaveProperty("maxAge");
-    expect(options).not.toHaveProperty("expires");
-  });
-
-  it("does not rewrite the persist cookie when serving an existing session", async () => {
-    store.entries = [{ name: PERSIST_COOKIE, value: "1" }];
-
-    await createAuthClient();
-    writeSessionCookie();
-
-    expect(
-      store.set.mock.calls.filter(([name]) => name === PERSIST_COOKIE),
-    ).toHaveLength(0);
   });
 });

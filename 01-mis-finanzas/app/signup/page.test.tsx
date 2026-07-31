@@ -1,5 +1,5 @@
 // @vitest-environment jsdom
-import { fireEvent, render, screen, waitFor } from "@testing-library/react";
+import { act, fireEvent, render, screen, waitFor } from "@testing-library/react";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 
 import { signUp as signUpAction } from "../../src/auth/actions";
@@ -29,7 +29,7 @@ afterEach(() => {
   vi.restoreAllMocks();
 });
 
-function submit({
+async function submit({
   email = "ana@example.com",
   password = "s3cret-pass",
 }: { email?: string; password?: string } = {}) {
@@ -37,7 +37,9 @@ function submit({
   fireEvent.change(screen.getByLabelText("Password"), {
     target: { value: password },
   });
-  fireEvent.click(screen.getByRole("button", { name: "Create account" }));
+  await act(async () => {
+    fireEvent.click(screen.getByRole("button", { name: "Create account" }));
+  });
 }
 
 describe("the screen", () => {
@@ -77,7 +79,7 @@ describe("a valid registration", () => {
   it("registers the normalized email with the password verbatim (2.3)", async () => {
     render(<Signup />);
 
-    submit({ email: "  Ana@Example.COM ", password: "s3cret-pass" });
+    await submit({ email: "  Ana@Example.COM ", password: "s3cret-pass" });
 
     await waitFor(() => expect(signUp).toHaveBeenCalledTimes(1));
     expect(signUp).toHaveBeenCalledWith({
@@ -90,7 +92,7 @@ describe("a valid registration", () => {
   it("continues straight to the next onboarding step (2.4)", async () => {
     render(<Signup />);
 
-    submit();
+    await submit();
 
     await waitFor(() =>
       expect(push).toHaveBeenCalledWith("/onboarding/profile"),
@@ -101,20 +103,20 @@ describe("a valid registration", () => {
 });
 
 describe("an invalid registration", () => {
-  it("annotates a malformed email and contacts nobody (2.5)", () => {
+  it("annotates a malformed email and contacts nobody (2.5)", async () => {
     render(<Signup />);
 
-    submit({ email: "not-an-email" });
+    await submit({ email: "not-an-email" });
 
     expect(screen.getByText("Enter a valid email address.")).toBeDefined();
     expect(signUp).not.toHaveBeenCalled();
     expect(push).not.toHaveBeenCalled();
   });
 
-  it("annotates a password below the minimum and contacts nobody (2.6)", () => {
+  it("annotates a password below the minimum and contacts nobody (2.6)", async () => {
     render(<Signup />);
 
-    submit({ password: "12345" });
+    await submit({ password: "12345" });
 
     expect(
       screen.getByText("Password must be at least 6 characters."),
@@ -137,7 +139,7 @@ describe("when the auth service refuses the registration", () => {
     signUp.mockResolvedValue(alreadyRegistered);
     render(<Signup />);
 
-    submit();
+    await submit();
 
     const alert = await screen.findByRole("alert");
     expect(alert.textContent).toBe(
@@ -152,7 +154,7 @@ describe("when the auth service refuses the registration", () => {
     signUp.mockResolvedValue(alreadyRegistered);
     render(<Signup />);
 
-    submit({ email: "ana@example.com", password: "s3cret-pass" });
+    await submit({ email: "ana@example.com", password: "s3cret-pass" });
 
     await screen.findByRole("alert");
     expect(screen.getByLabelText("Email").getAttribute("value")).toBe(
@@ -174,7 +176,7 @@ describe("when the auth service refuses the registration", () => {
     });
     render(<Signup />);
 
-    submit();
+    await submit();
 
     await screen.findByText("Password should be at least 8 characters");
     expect(
@@ -187,7 +189,7 @@ describe("when the auth service refuses the registration", () => {
     signUp.mockResolvedValue(alreadyRegistered);
     render(<Signup />);
 
-    submit();
+    await submit();
     await screen.findByRole("alert");
 
     let resolve: (value: { ok: true }) => void = () => {};
@@ -196,9 +198,14 @@ describe("when the auth service refuses the registration", () => {
         resolve = r;
       }),
     );
-    submit();
+    await submit();
 
     expect(screen.queryByRole("alert")).toBeNull();
-    resolve({ ok: true });
+
+    // Settled inside `act`, so the state the resolution produces — the form's
+    // in-flight guard coming off, the navigation — lands before the test ends.
+    await act(async () => {
+      resolve({ ok: true });
+    });
   });
 });

@@ -6,6 +6,7 @@ import { useRouter } from "next/navigation";
 import { BrandPanel } from "../../src/components/BrandPanel";
 import { LoginForm, type LoginSubmission } from "../../src/components/LoginForm";
 import { signIn } from "../../src/auth/actions";
+import { runAuthAction } from "../../src/auth/runAuthAction";
 import {
   type CredentialsError,
   validateCredentials,
@@ -34,12 +35,16 @@ export default function Login() {
       return;
     }
 
-    // The normalized email, and the password exactly as typed.
-    const outcome = await signIn({
-      email: result.credentials.email,
-      password: result.credentials.password,
-      remember,
-    });
+    // Through `runAuthAction`, so an action that rejects instead of returning
+    // still reaches the user as a banner rather than as a dead button.
+    const outcome = await runAuthAction(() =>
+      // The normalized email, and the password exactly as typed.
+      signIn({
+        email: result.credentials.email,
+        password: result.credentials.password,
+        remember,
+      }),
+    );
 
     if (!outcome.ok) {
       // The copy comes from the action; this page spells no failure message of

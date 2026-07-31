@@ -1,22 +1,28 @@
 // @vitest-environment jsdom
-import { fireEvent, render, screen } from "@testing-library/react";
+import { act, fireEvent, render, screen } from "@testing-library/react";
 import { beforeEach, describe, expect, it, vi } from "vitest";
 
 import { LoginForm } from "./LoginForm";
 
-const onSubmit = vi.fn(() => true);
+const onSubmit = vi.fn<(submission: unknown) => void | Promise<void>>();
 
 beforeEach(() => {
-  onSubmit.mockClear();
-  onSubmit.mockReturnValue(true);
+  onSubmit.mockReset();
 });
 
 function type(label: string, value: string) {
   fireEvent.change(screen.getByLabelText(label), { target: { value } });
 }
 
-function submit() {
-  fireEvent.click(screen.getByRole("button", { name: "Sign in" }));
+/**
+ * Awaited, because the form now awaits `onSubmit`: the state that re-enables
+ * the button settles a microtask later, and asserting before that would read
+ * the form mid-submission.
+ */
+async function submit() {
+  await act(async () => {
+    fireEvent.click(screen.getByRole("button", { name: "Sign in" }));
+  });
 }
 
 describe("copy from the design", () => {
@@ -61,12 +67,12 @@ describe("copy from the design", () => {
 });
 
 describe("submitting", () => {
-  it("hands the typed values to the caller", () => {
+  it("hands the typed values to the caller", async () => {
     render(<LoginForm onSubmit={onSubmit} />);
 
     type("Email", "ana@example.com");
     type("Password", "s3cret");
-    submit();
+    await submit();
 
     expect(onSubmit).toHaveBeenCalledWith({
       email: "ana@example.com",
@@ -75,23 +81,25 @@ describe("submitting", () => {
     });
   });
 
-  it("does not navigate away, so the submit default is prevented", () => {
+  it("does not navigate away, so the submit default is prevented", async () => {
     render(<LoginForm onSubmit={onSubmit} />);
 
     const form = screen.getByRole("button", { name: "Sign in" }).closest("form");
     const event = new Event("submit", { bubbles: true, cancelable: true });
-    form?.dispatchEvent(event);
+    await act(async () => {
+      form?.dispatchEvent(event);
+    });
 
     expect(event.defaultPrevented).toBe(true);
   });
 
-  it("submits empty values too — the domain validates, not the browser", () => {
+  it("submits empty values too — the domain validates, not the browser", async () => {
     // Mirrors ExpenseForm: native constraint validation would stop the request
     // before `validateCredentials` ever saw it, so there would be nothing to
     // report back.
     render(<LoginForm onSubmit={onSubmit} />);
 
-    submit();
+    await submit();
 
     expect(onSubmit).toHaveBeenCalledWith({
       email: "",
@@ -100,18 +108,80 @@ describe("submitting", () => {
     });
   });
 
-  it("keeps what the user typed when the caller rejects the submission", () => {
-    onSubmit.mockReturnValue(false);
+  it("keeps what the user typed when the caller rejects the submission", async () => {
     render(<LoginForm onSubmit={onSubmit} />);
 
     type("Email", "nope");
     type("Password", "s3cret");
-    submit();
+    await submit();
 
     expect(screen.getByLabelText<HTMLInputElement>("Email").value).toBe("nope");
     expect(screen.getByLabelText<HTMLInputElement>("Password").value).toBe(
       "s3cret",
     );
+  });
+});
+
+describe("a submission in flight", () => {
+  /** A submission that has been started and can be finished on demand. */
+  function deferred() {
+    let finish = () => {};
+    const settled = new Promise<void>((resolve) => {
+      finish = resolve;
+    });
+    onSubmit.mockReturnValue(settled);
+    return { finish, settled };
+  }
+
+  it("disables the button until the caller is done", async () => {
+    const { finish, settled } = deferred();
+    render(<LoginForm onSubmit={onSubmit} />);
+
+    await submit();
+    const button = screen.getByRole<HTMLButtonElement>("button", {
+      name: "Sign in",
+    });
+    expect(button.disabled).toBe(true);
+
+    await act(async () => {
+      finish();
+      await settled;
+    });
+    expect(button.disabled).toBe(false);
+  });
+
+  // Two concurrent sign-ins race each other's state updates and push the user
+  // towards the service's rate limit, for a click that changed nothing.
+  it("ignores a second submit while the first is still running", async () => {
+    const { finish, settled } = deferred();
+    render(<LoginForm onSubmit={onSubmit} />);
+
+    await submit();
+    await submit();
+
+    expect(onSubmit).toHaveBeenCalledTimes(1);
+
+    await act(async () => {
+      finish();
+      await settled;
+    });
+  });
+
+  // The guard is released on every outcome, not only on success: the form is
+  // never told whether the attempt worked, and one that could not be resubmitted
+  // after a rejected password would be worse than the double click.
+  it("takes the guard off again after a failed attempt", async () => {
+    const { finish, settled } = deferred();
+    render(<LoginForm onSubmit={onSubmit} />);
+
+    await submit();
+    await act(async () => {
+      finish();
+      await settled;
+    });
+    await submit();
+
+    expect(onSubmit).toHaveBeenCalledTimes(2);
   });
 });
 
@@ -125,11 +195,11 @@ describe("remember me", () => {
     ).toBe(false);
   });
 
-  it("travels with the submission once checked", () => {
+  it("travels with the submission once checked", async () => {
     render(<LoginForm onSubmit={onSubmit} />);
 
     fireEvent.click(screen.getByRole("checkbox", { name: "Remember me" }));
-    submit();
+    await submit();
 
     expect(onSubmit).toHaveBeenCalledWith(
       expect.objectContaining({ remember: true }),

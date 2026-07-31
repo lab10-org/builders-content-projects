@@ -13,7 +13,7 @@ const { createAuthClient, signInWithPassword, signUpCall } = vi.hoisted(() => ({
 vi.mock("./serverClient", () => ({ createAuthClient }));
 
 // A spy *over the real implementation*, not a stub: the cases below assert both
-// which screen was asked and the actual copy the caller receives.
+// which error was mapped and the actual copy the caller receives.
 vi.mock("./errors", async (importOriginal) => {
   const actual = await importOriginal<typeof import("./errors")>();
   return { ...actual, mapAuthError: vi.fn(actual.mapAuthError) };
@@ -113,7 +113,7 @@ describe("signIn — failures", () => {
       ok: false,
       failure: { kind: "banner", message: "Invalid email or password." },
     });
-    expect(mapAuthError).toHaveBeenCalledWith(error, "sign-in");
+    expect(mapAuthError).toHaveBeenCalledWith(error);
   });
 
   // An unreachable service must surface as copy, not as a 500.
@@ -269,7 +269,7 @@ describe("signUp", () => {
         message: "That email is already registered. Sign in instead.",
       },
     });
-    expect(mapAuthError).toHaveBeenCalledWith(error, "sign-up");
+    expect(mapAuthError).toHaveBeenCalledWith(error);
   });
 
   // The guard for the day `enable_confirmations` is turned on: a user without a
@@ -284,11 +284,14 @@ describe("signUp", () => {
 
     const result = await signUp({ email: "ana@example.com", password: PASSWORD });
 
+    // Named copy, not the generic banner: the account *was* created, so "try
+    // again" would send the user round a loop that can only ever answer
+    // "already registered".
     expect(result).toEqual({
       ok: false,
       failure: {
         kind: "banner",
-        message: "Something went wrong. Please try again.",
+        message: "Check your email to confirm your account, then sign in.",
       },
     });
     expect(log).toHaveBeenCalledTimes(1);

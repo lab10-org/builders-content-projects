@@ -20,6 +20,11 @@ export async function middleware(request: NextRequest) {
 
 export const config = {
   // Static assets and API routes are excluded: no session is read from them,
-  // and refreshing a token per chunk would be work for nothing.
-  matcher: ["/((?!_next/static|_next/image|favicon.ico|api/).*)"],
+  // and refreshing a token per asset is a real round trip to the auth service,
+  // not a local token decode. The extension list matters as much as the
+  // `_next/` prefixes — anything served straight out of `public/` has no prefix
+  // to exclude it by.
+  matcher: [
+    "/((?!_next/static|_next/image|favicon.ico|api/|.*\\.(?:svg|png|jpg|jpeg|gif|webp|avif|ico|woff|woff2|ttf|txt|xml|json|webmanifest)$).*)",
+  ],
 };
