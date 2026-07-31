@@ -3,40 +3,37 @@ import Link from "next/link";
 
 import type { CredentialsError, CredentialsField } from "../domain/credentials";
 import { Button } from "./ui/Button";
-import { Checkbox } from "./ui/Checkbox";
 import { PasswordField } from "./ui/PasswordField";
 import { TextField } from "./ui/TextField";
 
-export interface LoginSubmission {
+export interface SignupSubmission {
   email: string;
   password: string;
-  /** The "Remember me" checkbox: keep the session past this tab. */
-  remember: boolean;
 }
 
 const EMPTY = { email: "", password: "" };
 
 /**
- * The login screen's 420px form column.
+ * The sign-up screen's 420px form column — `LoginForm`'s sibling, not its
+ * second mode: the two differ in copy, in fields and in controls, and one
+ * component with a mode flag would make every branch conditional and every
+ * test parameterized.
  *
- * Props-driven in the same shape as `ExpenseForm`: this component owns the typed
- * values and the remember flag, the caller owns validation, persistence and
- * navigation. Nothing is cleared on success — unlike `ExpenseForm` — because a
- * successful sign-in navigates away, and clearing would only flash empty
- * inputs on the way out. That is also why `onSubmit` returns nothing: there is
- * no "accepted" for this form to react to.
+ * Props-driven the same way: this component owns the typed values, the caller
+ * owns validation, the call and navigation. It performs no validation of its
+ * own and never clears itself — a failed registration must leave the user
+ * looking at what they typed.
  */
-export function LoginForm({
+export function SignupForm({
   onSubmit,
   errors = [],
   saveError = null,
 }: {
-  onSubmit: (submission: LoginSubmission) => void;
+  onSubmit: (submission: SignupSubmission) => void;
   errors?: CredentialsError[];
   saveError?: string | null;
 }) {
   const [values, setValues] = useState(EMPTY);
-  const [remember, setRemember] = useState(false);
 
   function update(field: keyof typeof EMPTY, value: string) {
     setValues((current) => ({ ...current, [field]: value }));
@@ -49,32 +46,29 @@ export function LoginForm({
 
   return (
     <form
-      // noValidate, and no `required`/`type="email"` constraint enforcement:
-      // the browser must not block submission of invalid values, or
-      // `validateCredentials` would never get to report on them.
+      // noValidate, as in `LoginForm`: the browser must not block submission of
+      // invalid values, or `validateNewCredentials` would never see them.
       noValidate
       className="flex w-full max-w-[420px] flex-col gap-6"
       onSubmit={(event) => {
         event.preventDefault();
-        onSubmit({ ...values, remember });
+        onSubmit({ ...values });
       }}
     >
       <header className="flex flex-col gap-2">
         <h1 className="font-heading text-[30px] font-semibold text-text-primary">
-          Welcome back
+          Create your account
         </h1>
         <p className="font-body text-[15px] leading-normal text-text-secondary">
-          Sign in to continue building your Northstar plan.
+          Start building your Northstar plan.
         </p>
       </header>
 
-      {/* 18px between fields, per the design's Fields frame. */}
+      {/* 18px between fields, matching the sign-in column. */}
       <div className="flex flex-col gap-[18px]">
         <TextField
           id="email"
           label="Email"
-          // `type="email"` for the mobile keyboard; `noValidate` above keeps the
-          // browser from acting on it.
           type="email"
           autoComplete="email"
           placeholder="you@example.com"
@@ -86,29 +80,14 @@ export function LoginForm({
         <PasswordField
           id="password"
           label="Password"
-          autoComplete="current-password"
-          placeholder="Enter your password"
+          // `new-password`, not `current-password`: this is where a password
+          // manager should offer to generate one.
+          autoComplete="new-password"
+          placeholder="Create a password"
           value={values.password}
           onChange={(event) => update("password", event.target.value)}
           error={errorFor("password")}
         />
-      </div>
-
-      <div className="flex items-center justify-between gap-4">
-        {/* 10px gap, per the design's Remember Me frame. */}
-        <Checkbox
-          id="remember"
-          label="Remember me"
-          checked={remember}
-          onCheckedChange={setRemember}
-          className="gap-2.5"
-        />
-        <button
-          type="button"
-          className="cursor-pointer font-body text-[14px] font-medium text-accent hover:underline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-accent"
-        >
-          Forgot password?
-        </button>
       </div>
 
       {saveError !== null && (
@@ -118,16 +97,16 @@ export function LoginForm({
       )}
 
       <Button type="submit" variant="block">
-        Sign in
+        Create account
       </Button>
 
       <p className="flex justify-center gap-1.5 font-body text-[14px]">
-        <span className="text-text-secondary">New here?</span>
+        <span className="text-text-secondary">Already have an account?</span>
         <Link
-          href="/signup"
+          href="/login"
           className="cursor-pointer font-semibold text-accent hover:underline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-accent"
         >
-          Create an account
+          Sign in
         </Link>
       </p>
     </form>

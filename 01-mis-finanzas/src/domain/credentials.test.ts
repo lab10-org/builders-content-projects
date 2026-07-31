@@ -1,6 +1,10 @@
 import { describe, expect, it } from "vitest";
 
-import { validateCredentials } from "./credentials";
+import {
+  MIN_PASSWORD_LENGTH,
+  validateCredentials,
+  validateNewCredentials,
+} from "./credentials";
 
 /** Keeps the happy-path cases from repeating a valid counterpart field. */
 const VALID = { email: "ana@example.com", password: "s3cret-pass" };
@@ -114,5 +118,74 @@ describe("validateCredentials", () => {
 
     expect(result.ok).toBe(false);
     expect(result).not.toHaveProperty("credentials");
+  });
+});
+
+describe("validateNewCredentials", () => {
+  function newErrorFields(input: { email: unknown; password: unknown }) {
+    const result = validateNewCredentials(input);
+    return result.ok ? [] : result.errors.map((error) => error.field);
+  }
+
+  // The one rule sign-up adds. Mirrors `minimum_password_length` in
+  // supabase/config.toml: stricter would reject what the service accepts,
+  // looser would promise what it rejects.
+  it("mirrors the auth service's minimum password length", () => {
+    expect(MIN_PASSWORD_LENGTH).toBe(6);
+  });
+
+  it("rejects a password shorter than the minimum, on the password field", () => {
+    const result = validateNewCredentials({ ...VALID, password: "12345" });
+
+    expect(result.ok).toBe(false);
+    expect(!result.ok && result.errors).toEqual([
+      { field: "password", message: "Password must be at least 6 characters." },
+    ]);
+  });
+
+  it("accepts a password of exactly the minimum length", () => {
+    expect(validateNewCredentials({ ...VALID, password: "123456" })).toEqual({
+      ok: true,
+      credentials: { email: "ana@example.com", password: "123456" },
+    });
+  });
+
+  it("normalizes the email and keeps the password verbatim", () => {
+    expect(
+      validateNewCredentials({
+        email: "  Ana@Example.COM ",
+        password: " s3cret-pass ",
+      }),
+    ).toEqual({
+      ok: true,
+      credentials: { email: "ana@example.com", password: " s3cret-pass " },
+    });
+  });
+
+  // Built on validateCredentials rather than copying it, so the email rule
+  // cannot drift between the two screens.
+  it("still rejects a malformed email", () => {
+    expect(newErrorFields({ email: "ana@.example.com", password: VALID.password })).toEqual([
+      "email",
+    ]);
+  });
+
+  it("reports a bad email and a short password together, in form order", () => {
+    expect(newErrorFields({ email: "nope", password: "12345" })).toEqual([
+      "email",
+      "password",
+    ]);
+  });
+
+  // The required-field check and the length check describe the same input, so
+  // an empty password must not be annotated twice.
+  it.each([
+    { label: "empty", password: "" as unknown },
+    { label: "whitespace-only", password: "     " },
+    { label: "non-string", password: null },
+  ])("reports exactly one password error for a $label password", ({ password }) => {
+    expect(newErrorFields({ email: VALID.email, password })).toEqual([
+      "password",
+    ]);
   });
 });

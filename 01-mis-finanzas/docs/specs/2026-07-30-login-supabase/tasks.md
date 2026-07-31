@@ -1,6 +1,6 @@
 # Tasks — Sign in and sign up with Supabase Auth
 
-**Status:** Draft
+**Status:** Implemented
 **Date:** 2026-07-30
 **Requirements:** ./requirements.md
 **Design:** ./design.md
@@ -36,20 +36,20 @@ just *what* was built.
 
 ## Task overview
 
-- [ ] **T1** — Auth env: `readSupabaseEnv` reads and validates the Supabase settings
-- [ ] **T2** — Auth cookies: persistence rule (`applyPersistence`, `readsAsPersistent`, `persistCookie`)
-- [ ] **T3** — Auth errors: `mapAuthError` turns SDK failures into screen copy
-- [ ] **T4** — Domain: `validateNewCredentials` adds the 6-character password rule
-- [ ] **T5** — Auth server client: `createAuthClient` wired to Next's cookie store
-- [ ] **T6** — Server Action: `signIn`
-- [ ] **T7** — Server Action: `signUp`
-- [ ] **T8** — Middleware client: `refreshSession` refreshes tokens and preserves persistence
-- [ ] **T9** — Root `middleware.ts` runs `refreshSession` on navigable requests
-- [ ] **T10** — Extract `BrandPanel` out of the login page
-- [ ] **T11** — `LoginForm`: "Create an account" becomes a link to `/signup`, `onSubmit` returns `void`
-- [ ] **T12** — `SignupForm` component
-- [ ] **T13** — `/login` page calls `signIn`; delete `sessionStorage.ts`
-- [ ] **T14** — `/signup` page calls `signUp`
+- [x] **T1** — Auth env: `readSupabaseEnv` reads and validates the Supabase settings
+- [x] **T2** — Auth cookies: persistence rule (`applyPersistence`, `readsAsPersistent`, `persistCookie`)
+- [x] **T3** — Auth errors: `mapAuthError` turns SDK failures into screen copy
+- [x] **T4** — Domain: `validateNewCredentials` adds the 6-character password rule
+- [x] **T5** — Auth server client: `createAuthClient` wired to Next's cookie store
+- [x] **T6** — Server Action: `signIn`
+- [x] **T7** — Server Action: `signUp`
+- [x] **T8** — Middleware client: `refreshSession` refreshes tokens and preserves persistence
+- [x] **T9** — Root `middleware.ts` runs `refreshSession` on navigable requests
+- [x] **T10** — Extract `BrandPanel` out of the login page
+- [x] **T11** — `LoginForm`: "Create an account" becomes a link to `/signup`, `onSubmit` returns `void`
+- [x] **T12** — `SignupForm` component
+- [x] **T13** — `/login` page calls `signIn`; delete `sessionStorage.ts`
+- [x] **T14** — `/signup` page calls `signUp`
 
 ## Requirements coverage
 
@@ -96,7 +96,7 @@ just *what* was built.
 
 ### T1 — Auth env: `readSupabaseEnv` reads and validates the Supabase settings
 
-- **Status:** `[ ]`
+- **Status:** `[x]`
 - **Traces to:** 5.1, 5.2, 5.3 → Design → `src/auth/env.ts`
 - **Depends on:** none
 
@@ -128,11 +128,26 @@ missing, so no request is ever attempted against a half-configured connection.
 
 **Decision log:**
 
-**Outcome:**
+- The internal helper was first named `require`, which shadows the CJS global
+  and reads as an import at a glance. Renamed to `readVar`.
+- The helper `.trim()`s the value it returns, not just the one it tests. A
+  trailing space in `.env.local` would otherwise reach the SDK inside the URL.
+- The 5.3 grep hits `src/auth/env.test.ts` twice, and that is correct: the
+  fixture `"sb_secret_do-not-leak"` is the literal the test asserts is *not*
+  carried out of the module. No real secret is in the tree.
+
+**Outcome:** Done. `src/auth/env.ts` exports `SupabaseEnv` and
+`readSupabaseEnv(env = process.env)`; `src/auth/env.test.ts` covers 7 cases
+(both present, each absent, each blank/whitespace, `NEXT_PUBLIC_` names
+rejected as a fallback, and exactly two keys returned alongside a service-role
+key). `npm run typecheck` clean, `npm test` 652 passed / 33 files.
+`.env.local` (git-ignored) gained `SUPABASE_URL` and
+`SUPABASE_PUBLISHABLE_KEY` from `supabase status`; no secret or service-role
+key was added anywhere.
 
 ### T2 — Auth cookies: persistence rule (`applyPersistence`, `readsAsPersistent`, `persistCookie`)
 
-- **Status:** `[ ]`
+- **Status:** `[x]`
 - **Traces to:** 3.3, 3.4, 3.7 → Design → `src/auth/cookies.ts`
 - **Depends on:** none
 
@@ -174,11 +189,29 @@ later refresh can honour it.
 
 **Decision log:**
 
-**Outcome:**
+- `applyPersistence` strips the lifetime with a rest-destructure rather than
+  `delete`, so it returns a new object. The same options object is handed to us
+  once per cookie in a batch, and mutating it would leak one cookie's decision
+  into the next.
+- `persistCookie` sets `sameSite: "lax"` alongside `path: "/"`. It is not a
+  session cookie, but leaving `sameSite` unset would let it default per browser,
+  and a persistence marker that disagrees with the session cookies it describes
+  is worse than one that matches them.
+- `@supabase/ssr@0.12.4` installed here (T2 is the first module that needs it);
+  it pulls `@supabase/supabase-js` as a peer. Only the `CookieOptions` **type**
+  is imported, so the module stays pure.
+
+**Outcome:** Done. `src/auth/cookies.ts` exports `PERSIST_COOKIE`,
+`PERSIST_MAX_AGE`, `applyPersistence`, `readsAsPersistent` and `persistCookie`;
+`src/auth/cookies.test.ts` covers 16 cases, including the 3.4 assertion that
+both `maxAge` and `expires` are absent on the non-persistent branch (the
+`@supabase/ssr` 400-day default must not be inherited), non-mutation of the
+input, and every non-lifetime option passing through untouched in both
+branches. `npm run typecheck` clean.
 
 ### T3 — Auth errors: `mapAuthError` turns SDK failures into screen copy
 
-- **Status:** `[ ]`
+- **Status:** `[x]`
 - **Traces to:** 4.1, 4.2, 4.3, 4.4, 4.5, 4.6, and the message half of 1.4 and
   2.7 → Design → `src/auth/errors.ts`, Error handling table
 - **Depends on:** none
@@ -227,11 +260,26 @@ it does not recognize so the caller can log the raw detail without showing it.
 
 **Decision log:**
 
-**Outcome:**
+- A bare `TypeError` is detected by `name === "TypeError"`, not `instanceof`.
+  The module reads errors structurally so tests can build plain objects; mixing
+  the two styles would make one row of the table special for no reason.
+- `mapAuthError` takes the screen but does not branch on it (`_screen`). Every
+  row is screen-independent today; the parameter stays because the copy is a
+  product decision that may diverge, and the paired-screen assertion in the test
+  is what would catch a silent divergence.
+- `weak_password` prefers the service's own `message` over the local literal: if
+  the service's minimum changes before ours does, its wording is the true one.
+
+**Outcome:** Done. `src/auth/errors.ts` exports `Screen`, `AuthFailure`,
+`MappedAuthError` and `mapAuthError`, every literal in one `MESSAGES` map.
+`src/auth/errors.test.ts` — 16 cases, each run against **both** screens and
+asserted identical. Unrecognized input (`undefined`, `null`, a string, a number,
+an array) is handled without throwing, and neither the code `"banana"` nor the
+detail `"SECRET-DETAIL-42"` reaches `failure.message`.
 
 ### T4 — Domain: `validateNewCredentials` adds the 6-character password rule
 
-- **Status:** `[ ]`
+- **Status:** `[x]`
 - **Traces to:** 2.5, 2.6 (domain half) → Design → `src/domain/credentials.ts` (extended)
 - **Depends on:** none
 
@@ -271,11 +319,31 @@ than `MIN_PASSWORD_LENGTH` on the `password` field.
 
 **Decision log:**
 
-**Outcome:**
+- The length check is layered *outside* the delegation rather than inside a
+  rewritten validator: `validateNewCredentials` calls `validateCredentials`,
+  then appends a password error only when the password is present, non-blank
+  and short. That is what keeps an empty password to exactly one error — the
+  required-field check and the length check would otherwise both describe the
+  same input.
+- Appending last (instead of merging by field) is what preserves form order:
+  `["email", "password"]` for a submit that is wrong on both counts.
+- The message is built from `MIN_PASSWORD_LENGTH` but resolves to the exact
+  literal T3 falls back to, so a client-side rejection and a service-side one
+  read identically.
+- The first version of the "exactly one error" case used
+  `it.each([["", "empty"], ...])`, which passes under Vitest but fails `tsc`
+  (tuple arity). Rewritten as `it.each([{ label, password }])` with `$label`.
+  Tests passing is not the gate — typecheck is part of it.
+
+**Outcome:** Done. `src/domain/credentials.ts` gained `MIN_PASSWORD_LENGTH = 6`
+and `validateNewCredentials`; `src/domain/credentials.test.ts` grew from 32 to
+41 cases. All 32 pre-existing cases stayed green untouched — including "does not
+impose a minimum length" — which is the proof the sign-in rule was not changed.
+`npm run typecheck` clean, `npm test` 693 passed.
 
 ### T5 — Auth server client: `createAuthClient` wired to Next's cookie store
 
-- **Status:** `[ ]`
+- **Status:** `[x]`
 - **Traces to:** 3.1, and the write half of 3.3/3.4 → Design →
   `src/auth/serverClient.ts`
 - **Depends on:** T1, T2
@@ -317,11 +385,29 @@ persistence choice is being made.
 
 **Decision log:**
 
-**Outcome:**
+- "Establishing" vs "serving" a session is distinguished by
+  `persist !== undefined`, not by the boolean's truthiness. `createAuthClient(false)`
+  is an explicit choice and must write `PERSIST_COOKIE = "0"`; `createAuthClient()`
+  must write no marker at all. Collapsing the two would let a page render
+  silently re-decide what the user chose at sign-in.
+- `secure` follows the configured URL (`https://`), not `NODE_ENV`. The local
+  stack is plain http on 127.0.0.1, where a `Secure` cookie is simply dropped —
+  the session would vanish with no error to explain it.
+- The mocked `createServerClient` is typed with a rest parameter. A zero-arg
+  `vi.fn` records calls as the empty tuple, so indexing `mock.calls[0][0]`
+  passes Vitest but fails `tsc` (TS2493).
+
+**Outcome:** Done. `src/auth/serverClient.ts` exports `createAuthClient(persist?)`,
+building the SDK client over `await cookies()` and stamping every written cookie
+with `httpOnly: true`, `sameSite: "lax"`, `path: "/"`, URL-derived `secure`, and
+the lifetime `applyPersistence` decides. `src/auth/serverClient.test.ts` — 7
+cases covering 3.1, 3.3, 3.4 and both no-argument branches (recorded choice
+preserved; absent marker defaulting to a browser session, with no marker
+rewritten either way). `npm run typecheck` clean, `src/auth/` 46 tests green.
 
 ### T6 — Server Action: `signIn`
 
-- **Status:** `[ ]`
+- **Status:** `[x]`
 - **Traces to:** 1.1, 1.2 (session half), 1.3 (server re-validation), 1.4, 1.6,
   3.1, 3.3, 3.4, 4.6 (logging) → Design → `src/auth/actions.ts`
 - **Depends on:** T3, T5
@@ -369,11 +455,28 @@ leaked error.
 
 **Decision log:**
 
-**Outcome:**
+- Only `validated.errors[0]` is returned. `AuthFailure` describes one failure,
+  and the server path is the one reached without the form, where reporting the
+  first problem is enough; the page still annotates every field at once from its
+  own validation.
+- `console.error` logs the error alone, never the input. The password is not in
+  scope at that point, which is a stronger guarantee than remembering to strip
+  it.
+- `createAuthClient` is awaited outside the `try` on purpose: a missing env
+  variable must surface as a real error (5.2), not be dressed up as a failed
+  sign-in the user could retry forever.
+
+**Outcome:** Done. `src/auth/actions.ts` (`"use server"`) exports `AuthResult`
+and `signIn`; `src/auth/actions.test.ts` — 13 cases covering the happy path with
+a normalized email and verbatim password, the remember flag reaching
+`createAuthClient`, both server-side re-validation refusals (service never
+contacted), the identical banner for wrong credentials, a rejected call
+resolving as copy, a configuration error propagating, and the unrecognized-error
+log carrying the detail but not the password. `npm run typecheck` clean.
 
 ### T7 — Server Action: `signUp`
 
-- **Status:** `[ ]`
+- **Status:** `[x]`
 - **Traces to:** 2.3, 2.4, 2.5, 2.6 (server re-validation), 2.7, 3.5 → Design →
   `src/auth/actions.ts`, "Registered but no session returned"
 - **Depends on:** T4, T6
@@ -406,11 +509,27 @@ returns the already-registered failure instead of establishing anything.
 
 **Decision log:**
 
-**Outcome:**
+- The no-session guard is expressed as `toFailure(new Error(...), "sign-up")`
+  rather than a bespoke branch, so it inherits the generic banner *and* the
+  server log for free. The Error's message names the likely cause
+  (`enable_confirmations`), which is what the person who flipped that flag will
+  need to read in the log.
+- `signUp` shares `fieldFailure`/`toFailure` with `signIn` but not a generic
+  helper: the two differ in validator, persistence and the session check, and
+  factoring that into one parameterized function would hide all three
+  differences behind flags.
+
+**Outcome:** Done. `signUp` added to `src/auth/actions.ts`, using
+`validateNewCredentials` and `createAuthClient(true)` (3.5). Tests grew to 19:
+registration with a normalized email, the 5-character password and the malformed
+email both refused before any call, the already-registered banner mapped with
+the `"sign-up"` screen, the registered-but-no-session response reported as a
+failure *and* logged, and the password absent from both the result and the log.
+`npm run typecheck` clean.
 
 ### T8 — Middleware client: `refreshSession` refreshes tokens and preserves persistence
 
-- **Status:** `[ ]`
+- **Status:** `[x]`
 - **Traces to:** 3.6, 3.7, 3.8 → Design → `src/auth/middlewareClient.ts`
 - **Depends on:** T1, T2
 
@@ -455,11 +574,27 @@ with, and never lets a failed refresh fail the request.
 
 **Decision log:**
 
-**Outcome:**
+- The canonical Supabase snippet reassigns `response = NextResponse.next(...)`
+  *inside* `setAll`. Not done here: cookies are written onto the single response
+  object this function returns, which is both simpler and testable — a
+  reassigned response would leave the caller holding the pre-refresh one.
+- `getUser()`'s result is not inspected at all. Whatever the outcome — user,
+  error, or clearing — the SDK has already written the cookies it implies
+  through `setAll`, so branching on it would only add a way to disagree with it.
+- `it.each` over cookie fixtures needed an explicit `Record<string, string>`
+  type argument: TS otherwise infers a union with an optional key from
+  `[{ [PERSIST_COOKIE]: "0" }, {}]` and rejects it.
+
+**Outcome:** Done. `src/auth/middlewareClient.ts` exports `refreshSession`;
+`src/auth/middlewareClient.test.ts` — 10 cases over a real `NextRequest`,
+covering the connection, read-through, `getUser()` being called (3.6), the
+double write onto request *and* response, persistence preserved in both
+directions, the marker never rewritten (3.7), and both unrefreshable paths —
+SDK-reported and thrown — still resolving to a usable response (3.8).
 
 ### T9 — Root `middleware.ts` runs `refreshSession` on navigable requests
 
-- **Status:** `[ ]`
+- **Status:** `[x]`
 - **Traces to:** 3.6 (wiring) → Design → `middleware.ts` (project root)
 - **Depends on:** T8
 
@@ -498,11 +633,28 @@ routes are excluded by the matcher. The new root-level files are brought under
 
 **Decision log:**
 
-**Outcome:**
+- `middleware.ts` sits at the project root and imports `./src/auth/middlewareClient`.
+  Next only picks the file up beside `app/`, which is at the root here, so it
+  cannot live under `src/` no matter how much it looks like it belongs there.
+- `tsconfig.json`'s `include` gained both `middleware.ts` and
+  `middleware.test.ts`. Neither matched `app/**` or `src/**`, so `tsc` had been
+  skipping them silently — verified after the change with
+  `npx tsc --noEmit --listFiles | grep -c "/middleware\.\(test\.\)\?ts$"` → 2.
+- The "redirects nobody" case is not busywork: it is the assertion that fails
+  the day a route guard is added here without a spec change.
+
+**Outcome:** Done. `middleware.ts` exports `middleware` (pure delegation to
+`refreshSession`) and `config` with the matcher from the design.
+`middleware.test.ts` — 10 cases: delegation and identity of the returned
+response, no `location` header, and the matcher regex accepting `/`, `/login`,
+`/signup`, `/onboarding/profile` while rejecting `/_next/static/chunk.js`,
+`/_next/image`, `/favicon.ico` and `/api/suggest-category`. `npm run typecheck`
+clean, `npm test` 739 passed. The manual `npm run dev` pass is folded into
+T14's end-to-end smoke.
 
 ### T10 — Extract `BrandPanel` out of the login page
 
-- **Status:** `[ ]`
+- **Status:** `[x]`
 - **Traces to:** 2.9 → Design → `src/components/BrandPanel.tsx` (extracted)
 - **Depends on:** none
 
@@ -534,11 +686,22 @@ sign-up screen renders the identical panel, with no behaviour or markup change t
 
 **Decision log:**
 
-**Outcome:**
+- Moved verbatim, including the comment explaining why the tagline is a `<p>`
+  and not a heading. That comment is the reason the "opens no heading of its
+  own" case exists, and separating the two would strand both.
+- The panel's own test asserts the reassurances as an ordered list of
+  `listitem` text, not three `getByText` calls: order is part of the design, and
+  three independent lookups would pass on a shuffled panel.
+
+**Outcome:** Done. `src/components/BrandPanel.tsx` holds `BrandPanel` and
+`REASSURANCES`; `app/login/page.tsx` imports it and no longer imports `Icon` or
+`Wordmark`. `src/components/BrandPanel.test.tsx` — 3 cases. The pre-existing
+brand-panel `describe` in `app/login/page.test.tsx` stayed green untouched,
+which is the proof the extraction changed nothing.
 
 ### T11 — `LoginForm`: "Create an account" becomes a link to `/signup`, `onSubmit` returns `void`
 
-- **Status:** `[ ]`
+- **Status:** `[x]`
 - **Traces to:** 2.1 → Design → Changed and removed (`LoginForm`,
   `app/login/page.tsx`)
 - **Depends on:** none
@@ -574,11 +737,22 @@ sign-up screen renders the identical panel, with no behaviour or markup change t
 
 **Decision log:**
 
-**Outcome:**
+- `next/link` rendered under jsdom with no App Router context and no mock, so
+  the fallback the plan allowed for (`vi.mock("next/link")`) was not needed.
+  T12 and T14 follow the same approach: assert the `href`, never click.
+- As the plan predicted, narrowing `onSubmit` to `void` broke no caller —
+  TypeScript accepts a value-returning function where `void` is expected — so
+  the page's handler and the existing `vi.fn(() => true)` were left untouched
+  for T13 to rewrite.
+
+**Outcome:** Done. `LoginForm` renders `<Link href="/signup">` in place of the
+inert button, `onSubmit` is typed `=> void`, and the doc comment no longer
+claims the return value reports acceptance. `LoginForm.test.tsx` grew to 15
+cases; "Forgot password?" stays inert, per scope.
 
 ### T12 — `SignupForm` component
 
-- **Status:** `[ ]`
+- **Status:** `[x]`
 - **Traces to:** 2.2, 2.8 (component half), 2.9, 4.7 → Design →
   `src/components/SignupForm.tsx`
 - **Depends on:** none
@@ -634,11 +808,30 @@ password?", a link back to `/login`, per-field error annotation and a
 
 **Decision log:**
 
-**Outcome:**
+- **Copy confirmed by the user** and now fixed in `design.md`
+  (§ `SignupForm` → *Copy*), which is the source of truth T14 asserts against:
+  heading "Create your account", subtitle "Start building your Northstar plan.",
+  submit "Create account", footer "Already have an account?" + "Sign in",
+  password placeholder "Create a password".
+- `autoComplete="new-password"` rather than `current-password`: this is where a
+  password manager should offer to generate one.
+- The "exactly as typed" case had to be corrected mid-task. `input[type=email]`
+  sanitizes surrounding whitespace in the DOM itself, so the email arrives
+  trimmed however the component is written. The assertion now pins what is
+  actually ours — no lowercasing, and a password whose spaces survive — and says
+  why in a comment.
+
+**Outcome:** Done. `src/components/SignupForm.tsx` mirrors `LoginForm`'s
+structure and classes without "Remember me" or "Forgot password?", with
+`noValidate`, per-field `aria-invalid` annotation, a `role="alert"` banner row
+and a `<Link href="/login">`. `src/components/SignupForm.test.tsx` — 11 cases
+including the never-clears-itself guarantee (2.8) and the empty-fields submit
+that keeps the browser from blocking what `validateNewCredentials` must judge.
+`npm run typecheck` clean.
 
 ### T13 — `/login` page calls `signIn`; delete `sessionStorage.ts`
 
-- **Status:** `[ ]`
+- **Status:** `[x]`
 - **Traces to:** 1.1, 1.2, 1.3, 1.4, 1.5, 1.6, 3.2, 4.7, 4.8 → Design → Data
   flow (sign-in), Changed and removed
 - **Depends on:** T6, T10, T11
@@ -689,11 +882,30 @@ alert row, and the app keeps no record of who is signed in outside the cookies.
 
 **Decision log:**
 
-**Outcome:**
+- Both state resets moved to the *top* of `handleSubmit`, before validation.
+  Clearing them per-branch was what allowed a stale banner to sit next to a
+  fresh field error (4.8).
+- The three "when the session cannot be stored" cases were deleted rather than
+  ported: quota failures were a property of `localStorage`, and there is no
+  browser write left to fail. Their role is taken by the new
+  auth-service-rejection cases.
+- `grep` still reports `sessionStorage` in `app/login/page.test.tsx` — the
+  browser-native API, used by the case asserting both stores stay empty. That is
+  the 3.2 assertion itself, not a leftover of the deleted module.
+- The comment in `profileStorage.ts` that named `sessionStorage` now names
+  `transactionStorage`, the key scheme it actually mirrors.
+
+**Outcome:** Done. `app/login/page.tsx` awaits `signIn`, routes the returned
+failure to the banner or the field, and navigates with `push` + `refresh` only
+on success. `src/storage/sessionStorage.ts` and its test are deleted (`git rm`).
+`app/login/page.test.tsx` rewritten: 21 cases — normalized email, remember flag
+passed through, `refresh` called, browser storage left empty, password confined
+to the action, format errors never reaching the service, and the banner/field/
+clearing cases. `npm run typecheck` clean, `npm test` 740 passed.
 
 ### T14 — `/signup` page calls `signUp`
 
-- **Status:** `[ ]`
+- **Status:** `[x]`
 - **Traces to:** 2.3, 2.4, 2.5, 2.6, 2.7, 2.8, 2.9, 4.2, 4.3, 4.7, 4.8 →
   Design → `app/signup/page.tsx`
 - **Depends on:** T7, T10, T12
@@ -751,7 +963,27 @@ successful registration lands on `/onboarding/profile`.
 
 **Decision log:**
 
-**Outcome:**
+- The page is a near-mirror of `app/login/page.tsx` rather than a shared
+  abstraction: the two differ in validator, action, submission shape and copy,
+  and folding them into one parameterized page would hide all four behind flags.
+- Manual smoke run against the live stack (`supabase start` already up,
+  `npm run dev` on **:3001** — port 3000 was taken by another app): registering
+  `smoke-2026073001@example.com` landed on `/onboarding/profile` with no
+  confirmation step; `auth.users` holds the row, confirmed;
+  `document.cookie` exposes only `mis-finanzas:persist=1` — the session token is
+  absent from JS, which is the httpOnly guarantee holding — and both
+  `localStorage` and `sessionStorage` are empty (3.2). The only console error was
+  a 404 for `/favicon.ico`. This also covers T9's manual check: the middleware
+  ran on every one of those navigations without error.
+
+**Outcome:** Done. `app/signup/page.tsx` renders `BrandPanel` + `SignupForm` in
+the login page's layout, validates with `validateNewCredentials`, calls `signUp`
+and navigates with `push` + `refresh`. `app/signup/page.test.tsx` — 11 cases
+covering the mirrored layout, the single `<h1>`, the sign-in link, the
+normalized-email registration, no confirmation step, both client-side refusals,
+the already-registered banner, values preserved, the weak-password field
+annotation and the banner clearing. `npm run typecheck` clean, `npm test` 751
+passed / 41 files.
 
 ---
 

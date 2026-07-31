@@ -3,15 +3,26 @@
 import { useState } from "react";
 import { useRouter } from "next/navigation";
 
+import { signUp } from "../../src/auth/actions";
 import { BrandPanel } from "../../src/components/BrandPanel";
-import { LoginForm, type LoginSubmission } from "../../src/components/LoginForm";
-import { signIn } from "../../src/auth/actions";
+import {
+  SignupForm,
+  type SignupSubmission,
+} from "../../src/components/SignupForm";
 import {
   type CredentialsError,
-  validateCredentials,
+  validateNewCredentials,
 } from "../../src/domain/credentials";
 
-export default function Login() {
+/**
+ * The sign-up screen: the mirror of `/login`, against `validateNewCredentials`
+ * and the `signUp` action.
+ *
+ * Because the local stack has email confirmations disabled, a successful
+ * registration already carries a session, so it lands on the same onboarding
+ * step a sign-in does — no confirmation screen in between.
+ */
+export default function Signup() {
   const router = useRouter();
   const [errors, setErrors] = useState<CredentialsError[]>([]);
   const [saveError, setSaveError] = useState<string | null>(null);
@@ -19,40 +30,38 @@ export default function Login() {
   async function handleSubmit({
     email,
     password,
-    remember,
-  }: LoginSubmission): Promise<void> {
-    // Cleared before anything else: from here on, whatever is on screen must
-    // describe *this* attempt, never the previous one.
+  }: SignupSubmission): Promise<void> {
+    // Cleared first: from here on, what is on screen describes *this* attempt.
     setErrors([]);
     setSaveError(null);
 
-    const result = validateCredentials({ email, password });
+    const result = validateNewCredentials({ email, password });
     if (!result.ok) {
-      // Recomputed from this result, never accumulated, so a corrected field
-      // stops being annotated. Nothing was sent, so nothing navigates.
+      // Nothing was sent, so nothing navigates.
       setErrors(result.errors);
       return;
     }
 
-    // The normalized email, and the password exactly as typed.
-    const outcome = await signIn({
+    const outcome = await signUp({
+      // The normalized email, and the password exactly as typed.
       email: result.credentials.email,
       password: result.credentials.password,
-      remember,
     });
 
     if (!outcome.ok) {
       // The copy comes from the action; this page spells no failure message of
-      // its own. A failure never navigates: the session does not exist.
-      if (outcome.failure.kind === "banner") setSaveError(outcome.failure.message);
-      else setErrors([outcome.failure]);
+      // its own. No account, no session, no navigation.
+      if (outcome.failure.kind === "banner") {
+        setSaveError(outcome.failure.message);
+      } else {
+        setErrors([outcome.failure]);
+      }
       return;
     }
 
     router.push("/onboarding/profile");
     // The session cookies were written by the server during the action, so the
-    // next server render has to be asked for — otherwise it is still the
-    // signed-out one.
+    // next server render has to be asked for.
     router.refresh();
   }
 
@@ -62,7 +71,7 @@ export default function Login() {
         <BrandPanel />
 
         <section className="flex flex-1 items-center justify-center rounded-2xl bg-surface p-8 lg:p-14">
-          <LoginForm
+          <SignupForm
             onSubmit={handleSubmit}
             errors={errors}
             saveError={saveError}
