@@ -3,7 +3,7 @@ import {
   validateProfile,
 } from "../domain/financialProfile";
 
-/** Matches the key scheme of `expenseStorage` and `sessionStorage`. */
+/** Matches the key scheme of `transactionStorage`. */
 export const PROFILE_KEY = "mis-finanzas:financial-profile";
 
 /**

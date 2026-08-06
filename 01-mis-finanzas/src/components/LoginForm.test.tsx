@@ -38,6 +38,19 @@ describe("copy from the design", () => {
     expect(screen.getByText("Create an account")).toBeDefined();
   });
 
+  // The href only, never a click: navigation is next/link's job and needs the
+  // App Router context, and the routing itself is Next's, not ours.
+  it("routes to the sign-up screen through a real link", () => {
+    render(<LoginForm onSubmit={onSubmit} />);
+
+    expect(
+      screen.getByRole("link", { name: "Create an account" }).getAttribute("href"),
+    ).toBe("/signup");
+    expect(
+      screen.queryByRole("button", { name: "Create an account" }),
+    ).toBeNull();
+  });
+
   it("uses the design's email placeholder", () => {
     render(<LoginForm onSubmit={onSubmit} />);
 

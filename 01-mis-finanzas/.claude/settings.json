@@ -1,0 +1,10 @@
+{
+  "permissions": {
+    "allow": [
+      "mcp__playwright"
+    ],
+    "deny": [
+      "mcp__claude-in-chrome"
+    ]
+  }
+}

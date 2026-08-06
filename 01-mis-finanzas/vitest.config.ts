@@ -8,5 +8,7 @@ export default defineConfig({
     environment: "node",
     // Enables React Testing Library's automatic cleanup between tests.
     globals: true,
+    // e2e/ holds Playwright specs (npm run test:e2e), not Vitest suites.
+    exclude: ["**/node_modules/**", "**/dist/**", "e2e/**"],
   },
 });

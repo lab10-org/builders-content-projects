@@ -1,19 +1,29 @@
 // @vitest-environment jsdom
-import { fireEvent, render, screen } from "@testing-library/react";
+import { fireEvent, render, screen, waitFor } from "@testing-library/react";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 
-import { SESSION_KEY, loadSession } from "../../src/storage/sessionStorage";
+import { signIn as signInAction } from "../../src/auth/actions";
 import Login from "./page";
 
-// Hoisted so `vi.mock` (which runs before the imports) can close over it.
-const { push } = vi.hoisted(() => ({ push: vi.fn() }));
+// Hoisted so `vi.mock` (which runs before the imports) can close over them.
+const { push, refresh } = vi.hoisted(() => ({
+  push: vi.fn(),
+  refresh: vi.fn(),
+}));
 
 vi.mock("next/navigation", () => ({
-  useRouter: () => ({ push }),
+  useRouter: () => ({ push, refresh }),
 }));
+
+vi.mock("../../src/auth/actions", () => ({ signIn: vi.fn() }));
+
+const signIn = vi.mocked(signInAction);
 
 beforeEach(() => {
   push.mockClear();
+  refresh.mockClear();
+  signIn.mockReset();
+  signIn.mockResolvedValue({ ok: true });
   localStorage.clear();
   sessionStorage.clear();
 });
@@ -22,7 +32,7 @@ afterEach(() => {
   vi.restoreAllMocks();
 });
 
-function signIn({
+function submit({
   email = "ana@example.com",
   password = "s3cret",
   remember = false,
@@ -79,45 +89,75 @@ describe("the brand panel", () => {
 });
 
 describe("a valid sign-in", () => {
-  it("records who signed in", () => {
+  it("authenticates the normalized email, not the raw input (1.1)", async () => {
     render(<Login />);
 
-    signIn();
+    submit({ email: "  Ana@Example.COM " });
 
-    expect(loadSession()).toEqual({ email: "ana@example.com" });
+    await waitFor(() => expect(signIn).toHaveBeenCalledTimes(1));
+    expect(signIn).toHaveBeenCalledWith({
+      email: "ana@example.com",
+      password: "s3cret",
+      remember: false,
+    });
   });
 
-  it("stores the normalized email, not the raw input", () => {
+  it("continues to the next onboarding step (1.2)", async () => {
     render(<Login />);
 
-    signIn({ email: "  Ana@Example.COM  " });
+    submit();
 
-    expect(loadSession()).toEqual({ email: "ana@example.com" });
+    await waitFor(() =>
+      expect(push).toHaveBeenCalledWith("/onboarding/profile"),
+    );
   });
 
-  it("continues to the next onboarding step", () => {
+  // The cookies were written by the server during the action; without the
+  // refresh the next render would still be the signed-out one.
+  it("re-renders from the server so the new session is seen (1.2)", async () => {
     render(<Login />);
 
-    signIn();
+    submit();
 
-    expect(push).toHaveBeenCalledWith("/onboarding/profile");
+    await waitFor(() => expect(refresh).toHaveBeenCalledTimes(1));
   });
 
-  it("persists the session across restarts when remember is checked", () => {
+  it.each([true, false])(
+    "passes the remember choice through as %s (3.3/3.4)",
+    async (remember) => {
+      render(<Login />);
+
+      submit({ remember });
+
+      await waitFor(() =>
+        expect(signIn).toHaveBeenCalledWith(
+          expect.objectContaining({ remember }),
+        ),
+      );
+    },
+  );
+
+  // 3.2: the cookies are the only record of who is signed in.
+  it("writes nothing about the user to browser storage", async () => {
     render(<Login />);
 
-    signIn({ remember: true });
+    submit();
 
-    expect(localStorage.getItem(SESSION_KEY)).not.toBeNull();
+    await waitFor(() => expect(push).toHaveBeenCalled());
+    expect(localStorage.length).toBe(0);
+    expect(sessionStorage.length).toBe(0);
   });
 
-  it("keeps the session to the tab when remember is left unchecked", () => {
+  // 1.6: the password goes to the action and nowhere else.
+  it("sends the password to the action and to nothing else", async () => {
     render(<Login />);
 
-    signIn({ remember: false });
+    submit({ password: "s3cret-pass" });
 
-    expect(sessionStorage.getItem(SESSION_KEY)).not.toBeNull();
-    expect(localStorage.getItem(SESSION_KEY)).toBeNull();
+    await waitFor(() => expect(signIn).toHaveBeenCalled());
+    expect(signIn.mock.calls[0][0].password).toBe("s3cret-pass");
+    expect(push.mock.calls.flat().join(" ")).not.toContain("s3cret-pass");
+    expect(JSON.stringify(localStorage)).not.toContain("s3cret-pass");
   });
 });
 
@@ -125,7 +165,7 @@ describe("an invalid sign-in", () => {
   it("explains what is wrong with the email", () => {
     render(<Login />);
 
-    signIn({ email: "not-an-email" });
+    submit({ email: "not-an-email" });
 
     expect(screen.getByText("Enter a valid email address.")).toBeDefined();
   });
@@ -133,23 +173,24 @@ describe("an invalid sign-in", () => {
   it("explains a missing password", () => {
     render(<Login />);
 
-    signIn({ password: "" });
+    submit({ password: "" });
 
     expect(screen.getByText("Enter your password.")).toBeDefined();
   });
 
-  it("signs nobody in", () => {
+  // 1.3: a submission the form itself can reject never reaches the service.
+  it("does not contact the auth service at all", () => {
     render(<Login />);
 
-    signIn({ email: "not-an-email" });
+    submit({ email: "not-an-email" });
 
-    expect(loadSession()).toBeNull();
+    expect(signIn).not.toHaveBeenCalled();
   });
 
   it("stays on the page", () => {
     render(<Login />);
 
-    signIn({ email: "not-an-email" });
+    submit({ email: "not-an-email" });
 
     expect(push).not.toHaveBeenCalled();
   });
@@ -159,54 +200,99 @@ describe("an invalid sign-in", () => {
     // field must lose its message.
     render(<Login />);
 
-    signIn({ email: "not-an-email", password: "" });
+    submit({ email: "not-an-email", password: "" });
     expect(screen.getByText("Enter a valid email address.")).toBeDefined();
 
-    signIn({ email: "ana@example.com", password: "" });
+    submit({ email: "ana@example.com", password: "" });
 
     expect(screen.queryByText("Enter a valid email address.")).toBeNull();
     expect(screen.getByText("Enter your password.")).toBeDefined();
   });
 });
 
-describe("when the session cannot be stored", () => {
-  it("tells the user instead of pretending it worked", () => {
-    // Private-mode Safari and a full quota both make setItem throw.
-    vi.spyOn(Storage.prototype, "setItem").mockImplementation(() => {
-      throw new Error("QuotaExceededError");
-    });
+describe("when the auth service rejects the sign-in", () => {
+  const banner = {
+    ok: false as const,
+    failure: {
+      kind: "banner" as const,
+      message: "Invalid email or password.",
+    },
+  };
+
+  it("announces the failure without moving focus (1.4, 4.7)", async () => {
+    signIn.mockResolvedValue(banner);
     render(<Login />);
 
-    signIn();
+    submit();
 
-    expect(screen.getByRole("alert")).toBeDefined();
+    const alert = await screen.findByRole("alert");
+    expect(alert.textContent).toBe("Invalid email or password.");
   });
 
-  it("does not continue to the next step", () => {
-    vi.spyOn(Storage.prototype, "setItem").mockImplementation(() => {
-      throw new Error("QuotaExceededError");
+  it("does not continue to the next step (1.4)", async () => {
+    signIn.mockResolvedValue(banner);
+    render(<Login />);
+
+    submit();
+
+    await screen.findByRole("alert");
+    expect(push).not.toHaveBeenCalled();
+    expect(refresh).not.toHaveBeenCalled();
+  });
+
+  // 1.5: nothing the user typed is thrown away by a failure.
+  it("leaves the typed values in place", async () => {
+    signIn.mockResolvedValue(banner);
+    render(<Login />);
+
+    submit({ email: "ana@example.com", password: "s3cret" });
+
+    await screen.findByRole("alert");
+    expect(screen.getByLabelText("Email").getAttribute("value")).toBe(
+      "ana@example.com",
+    );
+    expect(screen.getByLabelText("Password").getAttribute("value")).toBe(
+      "s3cret",
+    );
+  });
+
+  it("lands a field failure on the field it names (4.3)", async () => {
+    signIn.mockResolvedValue({
+      ok: false,
+      failure: {
+        kind: "field",
+        field: "password",
+        message: "Password must be at least 6 characters.",
+      },
     });
     render(<Login />);
 
-    signIn();
+    submit();
 
+    await screen.findByText("Password must be at least 6 characters.");
+    expect(
+      screen.getByLabelText("Password").getAttribute("aria-invalid"),
+    ).toBe("true");
     expect(push).not.toHaveBeenCalled();
   });
 
-  it("drops the failure notice once a later attempt is merely invalid", () => {
-    const setItem = vi.spyOn(Storage.prototype, "setItem");
-    setItem.mockImplementationOnce(() => {
-      throw new Error("QuotaExceededError");
-    });
+  // 4.8: a stale message must not describe the attempt in flight.
+  it("clears the previous failure when a new attempt is submitted", async () => {
+    signIn.mockResolvedValue(banner);
     render(<Login />);
 
-    signIn();
-    expect(screen.getByRole("alert")).toBeDefined();
+    submit();
+    await screen.findByRole("alert");
 
-    signIn({ email: "not-an-email" });
+    let resolve: (value: { ok: true }) => void = () => {};
+    signIn.mockReturnValue(
+      new Promise<{ ok: true }>((r) => {
+        resolve = r;
+      }),
+    );
+    submit();
 
-    // No write was even attempted this time, so the old failure no longer
-    // describes anything on screen.
     expect(screen.queryByRole("alert")).toBeNull();
+    resolve({ ok: true });
   });
 });
