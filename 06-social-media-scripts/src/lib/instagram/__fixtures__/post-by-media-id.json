@@ -1,0 +1,24 @@
+{
+  "_comment": "Reconstructed from the shape docs/research/ig-tools-bench/e2e.mjs reads off fetchPostByMediaId: raw.items[0].caption.text, .video_duration, .video_versions[0].url.",
+  "items": [
+    {
+      "pk": "3501000000000000001",
+      "code": "DAaaaaaaaa1",
+      "media_type": 2,
+      "video_duration": 32.45,
+      "caption": {
+        "pk": "17900000000000000",
+        "text": "The Webb telescope just sent back something nobody expected."
+      },
+      "video_versions": [
+        { "type": 101, "width": 1080, "height": 1920, "url": "https://cdn.example/video-1-hi.mp4" },
+        { "type": 102, "width": 640, "height": 1138, "url": "https://cdn.example/video-1-lo.mp4" }
+      ],
+      "image_versions2": {
+        "candidates": [{ "url": "https://cdn.example/thumb-1-hi.jpg", "width": 1080, "height": 1920 }]
+      }
+    }
+  ],
+  "num_results": 1,
+  "more_available": false
+}
