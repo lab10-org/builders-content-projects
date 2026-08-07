@@ -1,0 +1,29 @@
+{
+  "skill_name": "brainstorming",
+  "evals": [
+    {
+      "id": 0,
+      "name": "categorize-feature",
+      "prompt": "Quiero agregar una función para categorizar gastos automáticamente según el nombre del comercio.",
+      "expected_output": "En vez de escribir código, explora el contexto del proyecto, hace una pregunta clarificadora a la vez y encamina hacia un diseño. No implementa nada todavía.",
+      "files": [],
+      "assertions": []
+    },
+    {
+      "id": 1,
+      "name": "simple-helper",
+      "prompt": "Agrégame un helper rápido que formatee montos a pesos colombianos, es sencillo.",
+      "expected_output": "Aunque parezca trivial, presenta un mini-diseño (aunque sea breve) y pide aprobación antes de implementar. No cae en 'es muy simple, lo escribo directo'.",
+      "files": [],
+      "assertions": []
+    },
+    {
+      "id": 2,
+      "name": "multi-subsystem",
+      "prompt": "Quiero construir un dashboard con presupuestos, alertas de gasto y reportes mensuales exportables a PDF.",
+      "expected_output": "Detecta que abarca múltiples subsistemas independientes, lo marca, y ayuda a descomponer / elegir una sola feature para hacer brainstorming primero, en vez de refinar detalles de todo.",
+      "files": [],
+      "assertions": []
+    }
+  ]
+}

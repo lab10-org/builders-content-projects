@@ -1,0 +1,16 @@
+# The git root's .gitignore only covers Python artifacts, so this
+# project-local file is what keeps build output and secrets out of the repo.
+# profiles/ is deliberately NOT ignored — actor profiles are committed.
+
+node_modules
+.next
+.mastra
+.env*.local
+next-env.d.ts
+tmp/
+*.tsbuildinfo
+
+# Salida de las corridas de Playwright y del MCP del navegador.
+test-results/
+playwright-report/
+.playwright-mcp/
