@@ -1,0 +1,25 @@
+{
+ "tool": "instaloader",
+ "results": [
+  {
+   "account": "nasa",
+   "t_listing_s": 0.92,
+   "t_enrich_s": 39.73,
+   "t_total_s": 40.65,
+   "reels": 8,
+   "posts_scanned": 25,
+   "with_caption": 8,
+   "with_video": 8,
+   "with_views": 0,
+   "with_music": 0,
+   "s_per_reel": 5.08,
+   "status": "ok"
+  },
+  {
+   "account": "openai",
+   "status": "error",
+   "error": "QueryReturnedBadRequestException: 400 Bad Request - \"fail\" status, message \"Asset asset://laser.provider/ig_business_category_subvertical has been deleted. You cannot use this schema\" when accessing https://www.ins",
+   "t_total_s": 0.65
+  }
+ ]
+}

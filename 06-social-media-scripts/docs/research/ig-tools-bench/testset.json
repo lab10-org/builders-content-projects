@@ -1,0 +1,12 @@
+{
+  "capturedAt": "2026-08-06",
+  "source": "instagram.com reels tab (authenticated Chrome session, claude-in-chrome)",
+  "reels": [
+    { "owner": "nasa",   "shortcode": "Dbn-XJhk0_-", "url": "https://www.instagram.com/reel/Dbn-XJhk0_-/" },
+    { "owner": "nasa",   "shortcode": "DbluoPsmhmo", "url": "https://www.instagram.com/reel/DbluoPsmhmo/" },
+    { "owner": "nasa",   "shortcode": "DbbSK7rD-SW", "url": "https://www.instagram.com/reel/DbbSK7rD-SW/" },
+    { "owner": "openai", "shortcode": "DboIbq4JKfe", "url": "https://www.instagram.com/reel/DboIbq4JKfe/" },
+    { "owner": "openai", "shortcode": "DblmI2LR3pn", "url": "https://www.instagram.com/reel/DblmI2LR3pn/" },
+    { "owner": "openai", "shortcode": "DbbTracJ_u5", "url": "https://www.instagram.com/reel/DbbTracJ_u5/" }
+  ]
+}

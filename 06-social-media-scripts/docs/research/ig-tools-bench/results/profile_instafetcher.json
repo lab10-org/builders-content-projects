@@ -1,0 +1,36 @@
+{
+ "tool": "insta-fetcher",
+ "workload": "últimos 12 reels por cuenta",
+ "results": [
+  {
+   "account": "nasa",
+   "t_total_s": 2.18,
+   "reels": 12,
+   "s_per_reel": 0.18,
+   "status": "ok",
+   "sample": {
+    "shortcode": "Dbn-XJhk0_-",
+    "likes": 202234,
+    "comments": 2101,
+    "play_count": 6938929,
+    "caption_len": 0,
+    "video_url": false
+   }
+  },
+  {
+   "account": "openai",
+   "t_total_s": 2.68,
+   "reels": 12,
+   "s_per_reel": 0.22,
+   "status": "ok",
+   "sample": {
+    "shortcode": "DboIbq4JKfe",
+    "likes": 1062,
+    "comments": 65,
+    "play_count": 310838,
+    "caption_len": 0,
+    "video_url": false
+   }
+  }
+ ]
+}

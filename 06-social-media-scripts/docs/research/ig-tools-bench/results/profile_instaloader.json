@@ -1,0 +1,22 @@
+{
+ "tool": "instaloader",
+ "workload": "últimos 12 reels por cuenta",
+ "results": [
+  {
+   "account": "nasa",
+   "status": "ok",
+   "t_profile_s": 1.46,
+   "t_posts_s": 54.7,
+   "t_total_s": 56.16,
+   "reels": 8,
+   "posts_scanned": 30,
+   "s_per_reel": 7.02
+  },
+  {
+   "account": "openai",
+   "status": "error",
+   "error": "QueryReturnedBadRequestException: 400 Bad Request - \"fail\" status, message \"Asset asset://laser.provider/ig_business_category_subvertical has been deleted. You cannot use this schema\" when accessing https://www.instagram.com/api/v1/us",
+   "t_total_s": 1.41
+  }
+ ]
+}
