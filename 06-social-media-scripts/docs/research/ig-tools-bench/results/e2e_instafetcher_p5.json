@@ -1,0 +1,54 @@
+{
+ "tool": "insta-fetcher",
+ "parallel": 5,
+ "results": [
+  {
+   "account": "nasa",
+   "parallel": 5,
+   "t_listing_s": 1.6,
+   "t_enrich_s": 1.02,
+   "t_total_s": 2.62,
+   "reels": 10,
+   "with_caption": 10,
+   "with_video": 10,
+   "with_views": 10,
+   "with_music": 10,
+   "s_per_reel": 0.26,
+   "status": "ok",
+   "sample": {
+    "shortcode": "Dbn-XJhk0_-",
+    "likes": 202241,
+    "comments": 2101,
+    "play_count": 6939232,
+    "caption": "Lunar landers, assemble.\n \nIn clean rooms across the country, the next generation of commercial lunar landers is coming together.\n \nFrom @BlueOrigin and @FireflyAerospace to @IntuitiveMachines and @VoyagerTech_, we're taking you behind the scenes to see the spacecraft that will deliver NASA science and technology to the Moon — helping pave the way for humanity's first Moon Base.\n \nVisit the link in our bio to watch the full video and explore the latest progress.\n \nCredit: NASA\n \n#NASA #Moon #Exploration #Science",
+    "duration": 32.448001861572266,
+    "video_url": "https://instagram.faep14-2.fna.fbcdn.net/o1/v/t2/f2/m86/AQP0XWA-IZtYgM60sxQGnTcDFXB9Qr-EQhcVIY3ka_HcKhek4fKaQD2iWGdl7pTcpiDXif3z1Qlej6QLPtOZ2QpOcr5NNocP8vK3n3Y.mp4?_nc_cat=107&_nc_oc=AdrKlkfl07X86DrE3onGAgQCkUasZPoh1TgAqB_RgQiGcdz5ZA7rMliMOSammrtM6v4&_nc_sid=5e9851&_nc_ht=instagram.faep14-2.fna.fbcdn.net&_nc_ohc=Pxs551LtI2MQ7kNvwF249Xl&efg=eyJ2ZW5jb2RlX3RhZyI6Inhwdl9wcm9ncmVzc2l2ZS5JTlNUQUdSQU0uQ0xJUFMuQzMuNzIwLmRhc2hfYmFzZWxpbmVfMV92MSIsInhwdl9hc3NldF9pZCI6MTg2MzM3NDk5MjYwNDkxNTIsImFzc2V0X2FnZV9kYXlzIjoyLCJ2aV91c2VjYXNlX2lkIjoxMDA5OSwiZHVyYXRpb25fcyI6MzIsInVybGdlbl9zb3VyY2UiOiJ3d3cifQ%3D%3D&ccb=17-1&vs=4af803ca1aa6e671&_nc_vs=HBksFQIYUmlnX3hwdl9yZWVsc19wZXJtYW5lbnRfc3JfcHJvZC85RjQ1RjNFMDRBMTY2RkM2RDIyODM1RDhFNjE3Mjc4N192aWRlb19kYXNoaW5pdC5tcDQVAALIARIAFQIYUWlnX3hwdl9wbGFjZW1lbnRfcGVybWFuZW50X3YyL0ZGNDE5MDc4MDNDMzhGRDQ4RjYxRkUxMEI2MjgyNkE3X2F1ZGlvX2Rhc2hpbml0Lm1wNBUCAsgBEgAoABgAGwKIB3VzZV9vaWwBMRJwcm9ncmVzc2l2ZV9yZWNpcGUBMRUAACaA1ufS_9KZQhUCKAJDMywXQEA3S8an754YEmRhc2hfYmFzZWxpbmVfMV92MREAdf4HZeadAQA&_nc_gid=Ydn546t97iST5KWbPqMvbg&_nc_map=urlgen_bucketless&_nc_zt=28&_nc_ss=7a3ba&oh=00_AQEn8sfKLHZMD04p6QQsLD0Bce-JM4DC2tb9bgyI5s-u5g&oe=6A76E008",
+    "music": "Audio asli"
+   }
+  },
+  {
+   "account": "openai",
+   "parallel": 5,
+   "t_listing_s": 2.64,
+   "t_enrich_s": 3.36,
+   "t_total_s": 6.01,
+   "reels": 10,
+   "with_caption": 10,
+   "with_video": 10,
+   "with_views": 10,
+   "with_music": 10,
+   "s_per_reel": 0.6,
+   "status": "ok",
+   "sample": {
+    "shortcode": "DboIbq4JKfe",
+    "likes": 1063,
+    "comments": 65,
+    "play_count": 310846,
+    "caption": "Your new birdwatching buddy is here. Make your own at the link in bio.",
+    "duration": 55.0880012512207,
+    "video_url": "https://instagram.faep14-3.fna.fbcdn.net/o1/v/t2/f2/m86/AQOtAEgLFTM05vSNtwp2a-9sw2AOFz5fFLgf117VC7bpj6SL2a4wKeb_h4f3P1Fx57h7-_SaCqdm0iEv4eiF8RBJ3PwIlKdMUPckV4I.mp4?_nc_cat=103&_nc_oc=Adoj7G_fN1IlHEVicAbaEMr4u15pJ1a85L0i0fvzW3Vsvjmuet6lLlAVOw5ln1M3Ltw&_nc_sid=5e9851&_nc_ht=instagram.faep14-3.fna.fbcdn.net&_nc_ohc=oBTy0DkcxpIQ7kNvwGpOAQi&efg=eyJ2ZW5jb2RlX3RhZyI6Inhwdl9wcm9ncmVzc2l2ZS5JTlNUQUdSQU0uQ0xJUFMuQzMuNzIwLmRhc2hfYmFzZWxpbmVfMV92MSIsInhwdl9hc3NldF9pZCI6MTA4ODE2MzA1MDIxMjU1MiwiYXNzZXRfYWdlX2RheXMiOjIsInZpX3VzZWNhc2VfaWQiOjEwMDk5LCJkdXJhdGlvbl9zIjo1NSwidXJsZ2VuX3NvdXJjZSI6Ind3dyJ9&ccb=17-1&vs=9c8176f45cbfba3d&_nc_vs=HBksFQIYUmlnX3hwdl9yZWVsc19wZXJtYW5lbnRfc3JfcHJvZC9BODRENDFCQzVGMDhENDVCODFGMDg4QUM5RUNFREU5N192aWRlb19kYXNoaW5pdC5tcDQVAALIARIAFQIYUWlnX3hwdl9wbGFjZW1lbnRfcGVybWFuZW50X3YyLzEwNDlGQjEwOERBQ0ZCRDdENUNFOEExOEU3NjMyMzk3X2F1ZGlvX2Rhc2hpbml0Lm1wNBUCAsgBEgAoABgAGwKIB3VzZV9vaWwBMRJwcm9ncmVzc2l2ZV9yZWNpcGUBMRUAACaQs4bBtuvuAxUCKAJDMywXQEuLQ5WBBiUYEmRhc2hfYmFzZWxpbmVfMV92MREAdf4HZeadAQA&_nc_gid=Brfuwi7i1cfLNFpDIQOqqw&_nc_map=urlgen_bucketless&_nc_zt=28&_nc_ss=7a3ba&oh=00_AQEHf3LftFHBG1K_AHj5FpD41HY66djDiIo7AR4ydjlb6A&oe=6A76D978",
+    "music": "Audio asli"
+   }
+  }
+ ]
+}

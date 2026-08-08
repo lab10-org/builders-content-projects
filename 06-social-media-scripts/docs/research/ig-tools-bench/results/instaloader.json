@@ -1,0 +1,385 @@
+{
+ "tool": "instaloader",
+ "version": "4.15.3",
+ "mode": "authenticated",
+ "results": [
+  {
+   "shortcode": "Dbn-XJhk0_-",
+   "owner": "nasa",
+   "t_metadata_s": 15.35,
+   "fields_ok": 20,
+   "fields_total": 28,
+   "fields": {
+    "shortcode": "Dbn-XJhk0_-",
+    "mediaid": 3956405067326902270,
+    "typename": "GraphVideo",
+    "is_video": true,
+    "title": null,
+    "caption": "Lunar landers, assemble.\n \nIn clean rooms across the country, the next generation of commercial lunar landers is coming together.\n \nFrom @BlueOrigin and @FireflyAerospace to @IntuitiveMachines and @VoyagerTech_, we're taking you behind the scenes to see the spacecraft that will deliver NASA science and technology to the Moon — helping pave the way for humanity's first Moon Base.\n \nVisit the link in our bio to watch the full video and explore the latest progress.\n \nCredit: NASA\n \n#NASA #Moon #Exploration #Science",
+    "caption_hashtags": [
+     "nasa",
+     "moon",
+     "exploration",
+     "science"
+    ],
+    "caption_mentions": [
+     "blueorigin",
+     "fireflyaerospace",
+     "intuitivemachines",
+     "voyagertech_"
+    ],
+    "tagged_users": [
+     "nasamoonbase",
+     "nasamoonbase"
+    ],
+    "likes": 202195,
+    "comments": 2101,
+    "video_view_count": null,
+    "video_duration": null,
+    "video_url": "https://instagram.faep14-2.fna.fbcdn.net/o1/v/t2/f2/m86/AQP0XWA-IZtYgM60sxQGnTcDFXB9Qr-EQhcVIY3ka_HcKhek4fKaQD2iWGdl7pTcpiDXif3z1Qlej6QLPtOZ2QpOcr5NNocP8vK3n3Y.mp4?_nc_cat=107&_nc_oc=AdrKlkfl07X86DrE3onGAgQCkUasZPoh1TgAqB_RgQiGcdz5ZA7rMliMOSammrtM6v4&_nc_sid=5e9851&_nc_ht=instagram.faep14-2.fna.fbcdn.net&_nc_ohc=Pxs551LtI2MQ7kNvwF249Xl&efg=eyJ2ZW5jb2RlX3RhZyI6Inhwdl9wcm9ncmVzc2l2ZS5JTlNUQUdSQU0uQ0xJUFMuQzMuNzIwLmRhc2hfYmFzZWxpbmVfMV92MSIsInhwdl9hc3NldF9pZCI6MTg2MzM3NDk5MjYwNDkxNTIsImFzc2V0X2FnZV9kYXlzIjoyLCJ2aV91c2VjYXNlX2lkIjoxMDA5OSwiZHVyYXRpb25fcyI6MzIsInVybGdlbl9zb3VyY2UiOiJ3d3cifQ%3D%3D&ccb=17-1&vs=4af803ca1aa6e671&_nc_vs=HBksFQIYUmlnX3hwdl9yZWVsc19wZXJtYW5lbnRfc3JfcHJvZC85RjQ1RjNFMDRBMTY2RkM2RDIyODM1RDhFNjE3Mjc4N192aWRlb19kYXNoaW5pdC5tcDQVAALIARIAFQIYUWlnX3hwdl9wbGFjZW1lbnRfcGVybWFuZW50X3YyL0ZGNDE5MDc4MDNDMzhGRDQ4RjYxRkUxMEI2MjgyNkE3X2F1ZGlvX2Rhc2hpbml0Lm1wNBUCAsgBEgAoABgAGwKIB3VzZV9vaWwBMRJwcm9ncmVzc2l2ZV9yZWNpcGUBMRUAACaA1ufS_9KZQhUCKAJDMywXQEA3S8an754YEmRhc2hfYmFzZWxpbmVfMV92MREAdf4HZeadAQA&_nc_gid=n61kCAiXe2xUrA8mKxn0YA&_nc_map=urlgen_bucketless&_nc_zt=28&_nc_ss=7a22e&oh=00_AQG5CzpBgeP782wUBfDK_ITSTnM73jlfzqpaisObQPHsCg&oe=6A76E008",
+    "url_thumbnail": "https://instagram.faep14-2.fna.fbcdn.net/v/t51.82787-15/764637906_18633750226049152_4753965783588088014_n.jpg?stp=dst-jpg_e15_tt6&_nc_cat=1&ig_cache_key=Mzk1NjQwNTA2NzMyNjkwMjI3MDE4NjMzNzUwMjIzMDQ5MTUy.3-ccb7-5&ccb=7-5&_nc_sid=58cdad&efg=eyJ2ZW5jb2RlX3RhZyI6IkNMSVBTLnhwaWRzLjEwODAuc2RyLnZpZGVvX2RlZmF1bHRfY292ZXJfZnJhbWUuQzMifQ%3D%3D&_nc_ohc=sec0Qc-RtE0Q7kNvwETs8Q5&_nc_oc=AdqSs9RVrejSMzMwpUTAjf3NUVVfs2K8xP0mtzPqx8JDoZs8mW5-knIlH0qh32AVHAI&_nc_ad=z-m&_nc_cid=0&_nc_zt=23&_nc_ht=instagram.faep14-2.fna&_nc_gid=n61kCAiXe2xUrA8mKxn0YA&_nc_ss=7a22e&oh=00_AQHtRtnk51gR5lfFvKghv_8ziwKEqyhBDYs0s-GGqfQ_DA&oe=6A7AE90F",
+    "date_utc": "2026-08-04T16:18:15",
+    "date_local": "2026-08-04T13:18:15-03:00",
+    "owner_username": "nasa",
+    "owner_id": "528817151",
+    "owner_followers": 104249636,
+    "owner_is_verified": true,
+    "location": null,
+    "is_sponsored": false,
+    "sponsor_users": [],
+    "is_pinned": false,
+    "accessibility_caption": null,
+    "music_title": null,
+    "music_artist": null
+   },
+   "comments_text": {
+    "ok": true,
+    "count": 5,
+    "seconds": 2.8,
+    "sample": [
+     {
+      "user": "mavideniz5521__",
+      "text": "We love you NASA 💙🌎🌊",
+      "likes": 482
+     },
+     {
+      "user": "achintyabairat",
+      "text": "what a time to be alive 🚀",
+      "likes": 33
+     }
+    ]
+   },
+   "t_video_s": 1.68,
+   "video_bytes": 5691930,
+   "status": "ok"
+  },
+  {
+   "shortcode": "DbluoPsmhmo",
+   "owner": "nasa",
+   "t_metadata_s": 7.42,
+   "fields_ok": 19,
+   "fields_total": 28,
+   "fields": {
+    "shortcode": "DbluoPsmhmo",
+    "mediaid": 3955772923487852968,
+    "typename": "GraphVideo",
+    "is_video": true,
+    "title": null,
+    "caption": "Is your name part of our legacy of exploration and discovery?\n\nAhead of its launch later this month, we installed a plaque on the Nancy Grace Roman Space Telescope holding an SD card with over one million submitted names, continuing our tradition of leaving humanity’s mark on the cosmos.\n\nCredit: NASA\n\n#NASA #Roman #Universe",
+    "caption_hashtags": [
+     "nasa",
+     "roman",
+     "universe"
+    ],
+    "caption_mentions": [],
+    "tagged_users": [
+     "nasagoddard",
+     "nasagoddard",
+     "nasakennedy",
+     "nasakennedy",
+     "nasauniverse",
+     "nasauniverse"
+    ],
+    "likes": 44280,
+    "comments": 466,
+    "video_view_count": null,
+    "video_duration": null,
+    "video_url": "https://instagram.faep14-2.fna.fbcdn.net/o1/v/t2/f2/m86/AQOxQhjKWjvlqUqefOpdylIR8bUxpMK0f34nF8kzk19ehSCrL5ZRKFpQULqLGwhEjX1dKHMfy8czyPHqz9KhLGa_zRQk9IHzwq6cZe8.mp4?_nc_cat=111&_nc_oc=Adohj26m-WFEt_3q81IGIUle0DodqESnTt7WckC2xUm0YXn9frRKcPOm_jkZPfuhDMs&_nc_sid=5e9851&_nc_ht=instagram.faep14-2.fna.fbcdn.net&_nc_ohc=JeU4KIfvgNIQ7kNvwG9pkVm&efg=eyJ2ZW5jb2RlX3RhZyI6Inhwdl9wcm9ncmVzc2l2ZS5JTlNUQUdSQU0uQ0xJUFMuQzMuNzIwLmRhc2hfYmFzZWxpbmVfMV92MSIsInhwdl9hc3NldF9pZCI6MTg2MzM0ODcxMzIwNDkxNTIsImFzc2V0X2FnZV9kYXlzIjozLCJ2aV91c2VjYXNlX2lkIjoxMDA5OSwiZHVyYXRpb25fcyI6NzksInVybGdlbl9zb3VyY2UiOiJ3d3cifQ%3D%3D&ccb=17-1&vs=ae3fec9d69b8880d&_nc_vs=HBksFQIYUmlnX3hwdl9yZWVsc19wZXJtYW5lbnRfc3JfcHJvZC9DNDRCODhEMTkyODAzQTRBODEzNzQ5NDE0MEJEMUQ5MF92aWRlb19kYXNoaW5pdC5tcDQVAALIARIAFQIYUWlnX3hwdl9wbGFjZW1lbnRfcGVybWFuZW50X3YyLzBCNEI2OUZDQURCMzNERUI3M0U3M0U2MThDNjlBM0E0X2F1ZGlvX2Rhc2hpbml0Lm1wNBUCAsgBEgAoABgAGwKIB3VzZV9vaWwBMRJwcm9ncmVzc2l2ZV9yZWNpcGUBMRUAACaA_PXW2cOZQhUCKAJDMywXQFP7tkWhysEYEmRhc2hfYmFzZWxpbmVfMV92MREAdf4HZeadAQA&_nc_gid=VMRrPgdfcJrMU7VFJJ6fCA&_nc_map=urlgen_bucketless&_nc_zt=28&_nc_ss=7a22e&oh=00_AQEyKnALxzIptL_JrrHYlwvrpr2LNutJxjGnXRLpyF32vA&oe=6A76F774",
+    "url_thumbnail": "https://instagram.faep14-2.fna.fbcdn.net/v/t51.82787-15/763381433_18633487333049152_4891230382554290317_n.jpg?stp=dst-jpg_e15_tt6&_nc_cat=106&_nc_map=urlgen_bucketless&ig_cache_key=Mzk1NTc3MjkyMzQ4Nzg1Mjk2ODE4NjMzNDg3MzMwMDQ5MTUy.3-ccb7-5&ccb=7-5&_nc_sid=58cdad&efg=eyJ2ZW5jb2RlX3RhZyI6IkNMSVBTLnhwaWRzLjQwNS5zZHIudmlkZW9fZGVmYXVsdF9jb3Zlcl9mcmFtZS5DMyJ9&_nc_ohc=lXx6yOX4EMkQ7kNvwFCcndy&_nc_oc=Adon6lMLjH_FcPBWoc1xAre7kIkZJbY35GAqjSt1yStPw9NSA73slX7HBMwuDhY5jBY&_nc_ad=z-m&_nc_cid=0&_nc_zt=23&_nc_ht=instagram.faep14-2.fna&_nc_gid=VMRrPgdfcJrMU7VFJJ6fCA&_nc_ss=7a22e&oh=00_AQFNpVrCkQpsE38zNwVll9glA5wCSZqlzjXN409sn2oGRQ&oe=6A7AB96A",
+    "date_utc": "2026-08-03T19:22:16",
+    "date_local": "2026-08-03T16:22:16-03:00",
+    "owner_username": "nasa",
+    "owner_id": "528817151",
+    "owner_followers": 104249636,
+    "owner_is_verified": true,
+    "location": null,
+    "is_sponsored": false,
+    "sponsor_users": [],
+    "is_pinned": false,
+    "accessibility_caption": null,
+    "music_title": null,
+    "music_artist": null
+   },
+   "comments_text": {
+    "ok": true,
+    "count": 5,
+    "seconds": 2.23,
+    "sample": [
+     {
+      "user": "sirios_baker",
+      "text": "I'm lucky because I always keep sending my name into space.",
+      "likes": 199
+     },
+     {
+      "user": "ivegam_03",
+      "text": "GLAD I HAVE MY TICKET WITH MY NAMEEEE!!! 😍❤️",
+      "likes": 124
+     }
+    ]
+   },
+   "t_video_s": 2.52,
+   "video_bytes": 7731561,
+   "status": "ok"
+  },
+  {
+   "shortcode": "DbbSK7rD-SW",
+   "owner": "nasa",
+   "t_metadata_s": 6.79,
+   "fields_ok": 18,
+   "fields_total": 28,
+   "fields": {
+    "shortcode": "DbbSK7rD-SW",
+    "mediaid": 3952833014052938902,
+    "typename": "GraphVideo",
+    "is_video": true,
+    "title": null,
+    "caption": "We’re about to see the bigger picture. 🌌\n\nOn Aug. 30, our Nancy Grace Roman Space Telescope will lift off to join our Hubble and Webb space telescopes in surveying the cosmos. With its wide field of view and specialized vision, it’ll help seek answers to the universe’s greatest mysteries.\n\nCheck our link in bio to learn more about Roman’s mission and what it will help uncover.\n \nCredit: NASA\n\n#NASA #Roman #Universe",
+    "caption_hashtags": [
+     "nasa",
+     "roman",
+     "universe"
+    ],
+    "caption_mentions": [],
+    "tagged_users": [],
+    "likes": 114431,
+    "comments": 848,
+    "video_view_count": null,
+    "video_duration": null,
+    "video_url": "https://instagram.faep14-2.fna.fbcdn.net/o1/v/t2/f2/m86/AQODeSQK_V6RlXKL1Fk8C2RCRSrsWEM712HOLP2TOjtwnp85prp7b30g6tO_iWCdlyblS6ah0Oti9bjHdpvgAAb31OPlJWgrV6-go2g.mp4?_nc_cat=103&_nc_oc=Adr71X5wiSuPi2bcMSCkabN6nW1R0oj3JcozsIoNIM0zunmC7ceEUqBLdKBJS2n6f2Q&_nc_sid=5e9851&_nc_ht=instagram.faep14-2.fna.fbcdn.net&_nc_ohc=-qE6wgxE9UUQ7kNvwFhgd_M&efg=eyJ2ZW5jb2RlX3RhZyI6Inhwdl9wcm9ncmVzc2l2ZS5JTlNUQUdSQU0uQ0xJUFMuQzMuNzIwLmRhc2hfYmFzZWxpbmVfMV92MSIsInhwdl9hc3NldF9pZCI6MTg2MzIxMzY1NTAwNDkxNTIsImFzc2V0X2FnZV9kYXlzIjo3LCJ2aV91c2VjYXNlX2lkIjoxMDA5OSwiZHVyYXRpb25fcyI6NTMsInVybGdlbl9zb3VyY2UiOiJ3d3cifQ%3D%3D&ccb=17-1&vs=ba22af90727fde70&_nc_vs=HBksFQIYUmlnX3hwdl9yZWVsc19wZXJtYW5lbnRfc3JfcHJvZC8xMDRDRDg3Q0Q2RDE5MEE4QzUwQUZDNUEyQ0NGRjJBN192aWRlb19kYXNoaW5pdC5tcDQVAALIARIAFQIYUWlnX3hwdl9wbGFjZW1lbnRfcGVybWFuZW50X3YyLzI0NENDMDA0QzREOUMyN0IwRDJBMTU0MjdEQ0M4RjgyX2F1ZGlvX2Rhc2hpbml0Lm1wNBUCAsgBEgAoABgAGwKIB3VzZV9vaWwBMRJwcm9ncmVzc2l2ZV9yZWNpcGUBMRUAACaAlseHi_WYQhUCKAJDMywXQErLAgxJul4YEmRhc2hfYmFzZWxpbmVfMV92MREAdf4HZeadAQA&_nc_gid=UaFfqpGTogD4j2mO6mnbNQ&_nc_map=urlgen_bucketless&_nc_zt=28&_nc_ss=7a22e&oh=00_AQHZspl40z1SMzg6NcEO3rfaDk-Jxk5Mpi6BIPs0dvNNAw&oe=6A76D4F8",
+    "url_thumbnail": "https://instagram.faep14-2.fna.fbcdn.net/v/t51.82787-15/751833242_18632185072049152_3682866334809127200_n.jpg?stp=dst-jpg_e15_tt6&_nc_cat=106&_nc_map=urlgen_bucketless&ig_cache_key=Mzk1MjgzMzAxNDA1MjkzODkwMjE4NjMyMTg1MDY5MDQ5MTUy.3-ccb7-5&ccb=7-5&_nc_sid=58cdad&efg=eyJ2ZW5jb2RlX3RhZyI6IkNMSVBTLnhwaWRzLjEwODAuc2RyLnZpZGVvX2RlZmF1bHRfY292ZXJfZnJhbWUuQzMifQ%3D%3D&_nc_ohc=B2YIWfQy_e4Q7kNvwGbH4xl&_nc_oc=AdrwwPOd3NZF8YNfPppR47gWQYbMl7SjLnWyZyDcg77XTf7icDdHfU1UAYPTOgWCCTo&_nc_ad=z-m&_nc_cid=0&_nc_zt=23&_nc_ht=instagram.faep14-2.fna&_nc_gid=UaFfqpGTogD4j2mO6mnbNQ&_nc_ss=7a22e&oh=00_AQEULslMZXpN9gnFN2AsHXuU3dhkN-zDHYZ3Sb17fYjwsw&oe=6A7AE1D0",
+    "date_utc": "2026-07-30T20:55:06",
+    "date_local": "2026-07-30T17:55:06-03:00",
+    "owner_username": "nasa",
+    "owner_id": "528817151",
+    "owner_followers": 104249635,
+    "owner_is_verified": true,
+    "location": null,
+    "is_sponsored": false,
+    "sponsor_users": [],
+    "is_pinned": false,
+    "accessibility_caption": null,
+    "music_title": null,
+    "music_artist": null
+   },
+   "comments_text": {
+    "ok": true,
+    "count": 5,
+    "seconds": 0.66,
+    "sample": [
+     {
+      "user": "seren_skies123",
+      "text": "Will the launch be live streaming?",
+      "likes": 244
+     },
+     {
+      "user": "space__affairs",
+      "text": "The next great chapter of space exploration is about to begin. 🔭✨ The universe s",
+      "likes": 120
+     }
+    ]
+   },
+   "t_video_s": 3.13,
+   "video_bytes": 9860942,
+   "status": "ok"
+  },
+  {
+   "shortcode": "DboIbq4JKfe",
+   "owner": "openai",
+   "t_metadata_s": 11.55,
+   "fields_ok": 17,
+   "fields_total": 28,
+   "fields": {
+    "shortcode": "DboIbq4JKfe",
+    "mediaid": 3956449358482024414,
+    "typename": "GraphVideo",
+    "is_video": true,
+    "title": null,
+    "caption": "Your new birdwatching buddy is here. Make your own at the link in bio.",
+    "caption_hashtags": [],
+    "caption_mentions": [],
+    "tagged_users": [],
+    "likes": 1062,
+    "comments": 65,
+    "video_view_count": null,
+    "video_duration": null,
+    "video_url": "https://instagram.faep14-3.fna.fbcdn.net/o1/v/t2/f2/m86/AQOtAEgLFTM05vSNtwp2a-9sw2AOFz5fFLgf117VC7bpj6SL2a4wKeb_h4f3P1Fx57h7-_SaCqdm0iEv4eiF8RBJ3PwIlKdMUPckV4I.mp4?_nc_cat=103&_nc_oc=Adoj7G_fN1IlHEVicAbaEMr4u15pJ1a85L0i0fvzW3Vsvjmuet6lLlAVOw5ln1M3Ltw&_nc_sid=5e9851&_nc_ht=instagram.faep14-3.fna.fbcdn.net&_nc_ohc=oBTy0DkcxpIQ7kNvwGpOAQi&efg=eyJ2ZW5jb2RlX3RhZyI6Inhwdl9wcm9ncmVzc2l2ZS5JTlNUQUdSQU0uQ0xJUFMuQzMuNzIwLmRhc2hfYmFzZWxpbmVfMV92MSIsInhwdl9hc3NldF9pZCI6MTA4ODE2MzA1MDIxMjU1MiwiYXNzZXRfYWdlX2RheXMiOjIsInZpX3VzZWNhc2VfaWQiOjEwMDk5LCJkdXJhdGlvbl9zIjo1NSwidXJsZ2VuX3NvdXJjZSI6Ind3dyJ9&ccb=17-1&vs=9c8176f45cbfba3d&_nc_vs=HBksFQIYUmlnX3hwdl9yZWVsc19wZXJtYW5lbnRfc3JfcHJvZC9BODRENDFCQzVGMDhENDVCODFGMDg4QUM5RUNFREU5N192aWRlb19kYXNoaW5pdC5tcDQVAALIARIAFQIYUWlnX3hwdl9wbGFjZW1lbnRfcGVybWFuZW50X3YyLzEwNDlGQjEwOERBQ0ZCRDdENUNFOEExOEU3NjMyMzk3X2F1ZGlvX2Rhc2hpbml0Lm1wNBUCAsgBEgAoABgAGwKIB3VzZV9vaWwBMRJwcm9ncmVzc2l2ZV9yZWNpcGUBMRUAACaQs4bBtuvuAxUCKAJDMywXQEuLQ5WBBiUYEmRhc2hfYmFzZWxpbmVfMV92MREAdf4HZeadAQA&_nc_gid=_daOK66CyzxMJjHgAIuG3A&_nc_map=urlgen_bucketless&_nc_zt=28&_nc_ss=7a22e&oh=00_AQF7o6AaVFoztBqVII_FNHdI8Im1WUqrWMku3iuQy5OfDA&oe=6A76D978",
+    "url_thumbnail": "https://instagram.faep14-2.fna.fbcdn.net/v/t51.82787-15/763515264_18111897125517701_8845740272601871481_n.jpg?stp=dst-jpg_e15_tt6&_nc_cat=111&_nc_map=urlgen_bucketless&ig_cache_key=Mzk1NjQ0OTM1ODQ4MjAyNDQxNDE4MTExODk3MTIyNTE3NzAx.3-ccb7-5&ccb=7-5&_nc_sid=58cdad&efg=eyJ2ZW5jb2RlX3RhZyI6IkNMSVBTLnhwaWRzLjEwODAuc2RyLnZpZGVvX2RlZmF1bHRfY292ZXJfZnJhbWUuQzMifQ%3D%3D&_nc_ohc=RPCapx9DfYwQ7kNvwH23XDQ&_nc_oc=AdoI-RG_t-w1Y3aKwEH-JhBhxJO5BGDl4Mwp2y76t44t3ZktuhsqxEEBiaR5gi9b-SI&_nc_ad=z-m&_nc_cid=0&_nc_zt=23&_nc_ht=instagram.faep14-2.fna&_nc_gid=_daOK66CyzxMJjHgAIuG3A&_nc_ss=7a22e&oh=00_AQEWF9wIeqJtoXW5KTYQdkrT7i7QMak27REiaJCcwP3u2g&oe=6A7ADA60",
+    "date_utc": "2026-08-04T17:46:41",
+    "date_local": "2026-08-04T14:46:41-03:00",
+    "owner_username": "openai",
+    "owner_id": "45374573700",
+    "owner_followers": 6505327,
+    "owner_is_verified": true,
+    "location": null,
+    "is_sponsored": false,
+    "sponsor_users": [],
+    "is_pinned": false,
+    "accessibility_caption": null,
+    "music_title": null,
+    "music_artist": null
+   },
+   "comments_text": {
+    "ok": true,
+    "count": 5,
+    "seconds": 0.98,
+    "sample": [
+     {
+      "user": "ariel2000e",
+      "text": "👏👏👏👏",
+      "likes": 1
+     },
+     {
+      "user": "iva.truksova.bluebunny",
+      "text": "Jeeeej 🥹...it is cute!",
+      "likes": 2
+     }
+    ]
+   },
+   "t_video_s": 2.63,
+   "video_bytes": 8461546,
+   "status": "ok"
+  },
+  {
+   "shortcode": "DblmI2LR3pn",
+   "owner": "openai",
+   "t_metadata_s": 7.38,
+   "fields_ok": 19,
+   "fields_total": 28,
+   "fields": {
+    "shortcode": "DblmI2LR3pn",
+    "mediaid": 3955735581409376871,
+    "typename": "GraphVideo",
+    "is_video": true,
+    "title": null,
+    "caption": "For lifelong Rockaway locals @kookmike and @mikereinhardtt, the goal was never just to start a business, it was to strengthen their community. From managing staff schedules and payroll to automating communications and troubleshooting daily operations, ChatGPT helps them spend less time behind a desk and more time with the people they serve.",
+    "caption_hashtags": [],
+    "caption_mentions": [
+     "kookmike",
+     "mikereinhardtt"
+    ],
+    "tagged_users": [
+     "kookmike",
+     "localssurfschool",
+     "mikereinhardtt",
+     "localscollective"
+    ],
+    "likes": 1026,
+    "comments": 75,
+    "video_view_count": null,
+    "video_duration": null,
+    "video_url": "https://instagram.faep14-2.fna.fbcdn.net/o1/v/t2/f2/m86/AQOKx-Swt31O8rpz9E7oDxYtMp-hfn6eC9zLEiCWvST7wpNSuhd-VFi5vaPQaP7F8jPLLuu9goDiYydlpFoHhFx4tBknAz6rDbdHVVU.mp4?_nc_cat=108&_nc_oc=AdoQeFs4H-0pLLK3DvN0PjcQiKxhz2zX4uhFwUFFeq7kFdJzhYWJ0gesde4dfNsSMKQ&_nc_sid=5e9851&_nc_ht=instagram.faep14-2.fna.fbcdn.net&_nc_ohc=TkWZtxvlT_EQ7kNvwHOFwSj&efg=eyJ2ZW5jb2RlX3RhZyI6Inhwdl9wcm9ncmVzc2l2ZS5JTlNUQUdSQU0uQ0xJUFMuQzMuNzIwLmRhc2hfYmFzZWxpbmVfMV92MSIsInhwdl9hc3NldF9pZCI6MjEwMjgxMDAxMzk3MTQ5NCwiYXNzZXRfYWdlX2RheXMiOjMsInZpX3VzZWNhc2VfaWQiOjEwMDk5LCJkdXJhdGlvbl9zIjo2NCwidXJsZ2VuX3NvdXJjZSI6Ind3dyJ9&ccb=17-1&vs=db0042fd60fe7f82&_nc_vs=HBksFQIYUmlnX3hwdl9yZWVsc19wZXJtYW5lbnRfc3JfcHJvZC8zMjQ3QTE5M0U2NUVCOERCQUJGODdCREIyRjFCRDNBNV92aWRlb19kYXNoaW5pdC5tcDQVAALIARIAFQIYUWlnX3hwdl9wbGFjZW1lbnRfcGVybWFuZW50X3YyLzQ4NDMyNDVFNTIzNjIzQTg3NTE0NTFEQTZDMDQ3QkJBX2F1ZGlvX2Rhc2hpbml0Lm1wNBUCAsgBEgAoABgAGwKIB3VzZV9vaWwBMRJwcm9ncmVzc2l2ZV9yZWNpcGUBMRUAACbM0M2-05-8BxUCKAJDMywXQFAWyLQ5WBAYEmRhc2hfYmFzZWxpbmVfMV92MREAdf4HZeadAQA&_nc_gid=l-ik83kCOcOfqiS2GTdyCg&_nc_map=urlgen_bucketless&_nc_zt=28&_nc_ss=7a22e&oh=00_AQEAlwhf6RIA_a4iACbJIwlGYOa1wOcltus1uPPgD4BqiA&oe=6A76D93D",
+    "url_thumbnail": "https://instagram.faep14-2.fna.fbcdn.net/v/t51.82787-15/763824566_18111747302517701_4289600936870192834_n.jpg?stp=dst-jpg_e15_tt6&_nc_cat=103&_nc_map=urlgen_bucketless&ig_cache_key=Mzk1NTczNTU4MTQwOTM3Njg3MTE4MTExNzQ3Mjk5NTE3NzAx.3-ccb7-5&ccb=7-5&_nc_sid=58cdad&efg=eyJ2ZW5jb2RlX3RhZyI6IkNMSVBTLnhwaWRzLjEwODAuc2RyLnZpZGVvX2RlZmF1bHRfY292ZXJfZnJhbWUuQzMifQ%3D%3D&_nc_ohc=BN_uc4e24-gQ7kNvwGYA6R8&_nc_oc=AdrhQUDB0i1Po_GXlJ39K8HaMN3rIIEj-Y1Wb1N7uTqVlUSJ1Glgq0Jb9EHvvq5o6so&_nc_ad=z-m&_nc_cid=0&_nc_zt=23&_nc_ht=instagram.faep14-2.fna&_nc_gid=l-ik83kCOcOfqiS2GTdyCg&_nc_ss=7a22e&oh=00_AQFxoJ_4Md7MMymrGI9bIJ1nnETRGO9NaJYFyQSG0yZ3Ig&oe=6A7AEB05",
+    "date_utc": "2026-08-03T18:09:22",
+    "date_local": "2026-08-03T15:09:22-03:00",
+    "owner_username": "openai",
+    "owner_id": "45374573700",
+    "owner_followers": 6505325,
+    "owner_is_verified": true,
+    "location": null,
+    "is_sponsored": false,
+    "sponsor_users": [],
+    "is_pinned": false,
+    "accessibility_caption": null,
+    "music_title": null,
+    "music_artist": null
+   },
+   "comments_text": {
+    "ok": true,
+    "count": 5,
+    "seconds": 0.91,
+    "sample": [
+     {
+      "user": "hillconstructionnyc",
+      "text": "👏👏",
+      "likes": 1
+     },
+     {
+      "user": "bigirish4",
+      "text": "Awesome 👏🏻 🔥",
+      "likes": 0
+     }
+    ]
+   },
+   "t_video_s": 2.64,
+   "video_bytes": 7876629,
+   "status": "ok"
+  },
+  {
+   "shortcode": "DbbTracJ_u5",
+   "owner": "openai",
+   "t_metadata_s": 8.21,
+   "fields_ok": 17,
+   "fields_total": 28,
+   "fields": {
+    "shortcode": "DbbTracJ_u5",
+    "mediaid": 3952839644158622649,
+    "typename": "GraphVideo",
+    "is_video": true,
+    "title": null,
+    "caption": "What does “benefits for all” really mean?",
+    "caption_hashtags": [],
+    "caption_mentions": [],
+    "tagged_users": [],
+    "likes": 1246,
+    "comments": 101,
+    "video_view_count": null,
+    "video_duration": null,
+    "video_url": "https://instagram.faep14-2.fna.fbcdn.net/o1/v/t2/f2/m86/AQNfaMFtdfX8II0nGnWUw-_WkHqiKDEEiP8YozKVXUTBmTy43mG3u__qh04d4XqWK9CYo0IoXUtHxHZ05Nmjtb2k7ACBrR6wY8cw2Lk.mp4?_nc_cat=108&_nc_oc=AdrtjZHkjXObidVVcPxuDCSNXP9R11b8Scb_w2433UUqxnfpUBL29ta7ATjhFlM_BR0&_nc_sid=5e9851&_nc_ht=instagram.faep14-2.fna.fbcdn.net&_nc_ohc=ugyvZA7zAdsQ7kNvwEjZwPL&efg=eyJ2ZW5jb2RlX3RhZyI6Inhwdl9wcm9ncmVzc2l2ZS5JTlNUQUdSQU0uQ0xJUFMuQzMuNzIwLmRhc2hfYmFzZWxpbmVfMV92MSIsInhwdl9hc3NldF9pZCI6MjA5OTY3OTcxNzU2NzQ1MywiYXNzZXRfYWdlX2RheXMiOjcsInZpX3VzZWNhc2VfaWQiOjEwMDk5LCJkdXJhdGlvbl9zIjoxMDMsInVybGdlbl9zb3VyY2UiOiJ3d3cifQ%3D%3D&ccb=17-1&vs=d5f8fd4e09f6adef&_nc_vs=HBksFQIYUmlnX3hwdl9yZWVsc19wZXJtYW5lbnRfc3JfcHJvZC9GMjQzRTAwNUU0NDhFQ0VCQzY0Q0JCQ0JCNUM4RDA5RV92aWRlb19kYXNoaW5pdC5tcDQVAALIARIAFQIYUWlnX3hwdl9wbGFjZW1lbnRfcGVybWFuZW50X3YyLzNDNDQwRERCNjEyQUNDNDhEQTM5QjU4MkVBOTBEQTlGX2F1ZGlvX2Rhc2hpbml0Lm1wNBUCAsgBEgAoABgAGwKIB3VzZV9vaWwBMRJwcm9ncmVzc2l2ZV9yZWNpcGUBMRUAACa6r6n7uOm6BxUCKAJDMywXQFnO6XjU_fQYEmRhc2hfYmFzZWxpbmVfMV92MREAdf4HZeadAQA&_nc_gid=Kqeb4TKw1W47IHGv3I0KjA&_nc_map=urlgen_bucketless&_nc_zt=28&_nc_ss=7a3ba&oh=00_AQHxHgL0yfyL0Esm7mKwPlSbMPfkg74qLB1AFmCiDBDnUQ&oe=6A76E021",
+    "url_thumbnail": "https://instagram.faep14-3.fna.fbcdn.net/v/t51.82787-15/758427456_18111178520517701_2858509264361472282_n.jpg?stp=dst-jpg_e15_tt6&_nc_cat=106&_nc_map=urlgen_bucketless&ig_cache_key=Mzk1MjgzOTY0NDE1ODYyMjY0OTE4MTExMTc4NTE0NTE3NzAx.3-ccb7-5&ccb=7-5&_nc_sid=58cdad&efg=eyJ2ZW5jb2RlX3RhZyI6IkNMSVBTLnhwaWRzLjcyMC5zZHIudmlkZW9fZGVmYXVsdF9jb3Zlcl9mcmFtZS5DMyJ9&_nc_ohc=OlhXs1_kfEMQ7kNvwFBnOUo&_nc_oc=Adql5hp3ueCVrbSDYzQ-uBXJmF4MXaDk9P2Q_To1qVj3IX9FJumbGjjLzvSRoWCK8ro&_nc_ad=z-m&_nc_cid=0&_nc_zt=23&_nc_ht=instagram.faep14-3.fna&_nc_gid=DpISAcvbd6YhUMgdbR-bDQ&_nc_ss=7a22e&oh=00_AQGZt7H-tmid6B9PNCq1TMwfSD83iqMg2l2lhtiOSkn5Rw&oe=6A7AC478",
+    "date_utc": "2026-07-30T18:21:26",
+    "date_local": "2026-07-30T15:21:26-03:00",
+    "owner_username": "openai",
+    "owner_id": "45374573700",
+    "owner_followers": 6505324,
+    "owner_is_verified": true,
+    "location": null,
+    "is_sponsored": false,
+    "sponsor_users": [],
+    "is_pinned": false,
+    "accessibility_caption": null,
+    "music_title": null,
+    "music_artist": null
+   },
+   "comments_text": {
+    "ok": true,
+    "count": 5,
+    "seconds": 0.8,
+    "sample": [
+     {
+      "user": "munni._ma",
+      "text": "❤️❤️❤️🔥🔥🔥🔥👏👏👏👏👏👏👏",
+      "likes": 1
+     },
+     {
+      "user": "shristy_sharma_0",
+      "text": "😍😍😍",
+      "likes": 9
+     }
+    ]
+   },
+   "t_video_s": 1.8,
+   "video_bytes": 4599901,
+   "status": "ok"
+  }
+ ]
+}

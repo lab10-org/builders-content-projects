@@ -1,0 +1,77 @@
+{
+  "_comment": "Reconstructed from insta-fetcher@1.4.0's own types (dist/types/UserReel.d.ts -> ProfileReel, whose node.media is the Media interface in dist/types/PostFeedResult.d.ts) and the fields docs/research/ig-tools-bench/e2e.mjs reads. The benchmark archived only derived fields, so the raw payload had to be rebuilt. Note view_count is null on this payload and play_count carries the real number.",
+  "xdt_api__v1__clips__user__connection_v2": {
+    "edges": [
+      {
+        "cursor": "c1",
+        "node": {
+          "__typename": "XDTClipsItemDict",
+          "media": {
+            "pk": "3501000000000000001",
+            "id": "3501000000000000001_12345",
+            "code": "DAaaaaaaaa1",
+            "taken_at": 1754400000,
+            "media_type": 2,
+            "product_type": "clips",
+            "play_count": 6900000,
+            "view_count": null,
+            "like_count": 412000,
+            "comment_count": 1820,
+            "user": { "pk": "12345", "id": "12345", "username": "nasa" },
+            "image_versions2": {
+              "candidates": [
+                { "url": "https://cdn.example/thumb-1-hi.jpg", "width": 1080, "height": 1920 },
+                { "url": "https://cdn.example/thumb-1-lo.jpg", "width": 320, "height": 569 }
+              ]
+            }
+          }
+        }
+      },
+      {
+        "cursor": "c2",
+        "node": {
+          "__typename": "XDTClipsItemDict",
+          "media": {
+            "pk": "3501000000000000002",
+            "id": "3501000000000000002_12345",
+            "code": "DAaaaaaaaa2",
+            "taken_at": 1754300000,
+            "media_type": 2,
+            "product_type": "clips",
+            "play_count": 1200000,
+            "view_count": null,
+            "like_count": 88000,
+            "comment_count": 430,
+            "user": { "pk": "12345", "id": "12345", "username": "nasa" },
+            "image_versions2": {
+              "candidates": [
+                { "url": "https://cdn.example/thumb-2-hi.jpg", "width": 1080, "height": 1920 }
+              ]
+            }
+          }
+        }
+      },
+      {
+        "cursor": "c3",
+        "node": {
+          "__typename": "XDTClipsItemDict",
+          "media": {
+            "pk": "3501000000000000003",
+            "id": "3501000000000000003_12345",
+            "code": "DAaaaaaaaa3",
+            "taken_at": 1754200000,
+            "media_type": 2,
+            "product_type": "clips",
+            "play_count": 44000,
+            "view_count": null,
+            "like_count": 3100,
+            "comment_count": 12,
+            "user": { "pk": "12345", "id": "12345", "username": "nasa" },
+            "image_versions2": { "candidates": [] }
+          }
+        }
+      }
+    ],
+    "page_info": { "has_next_page": true, "end_cursor": "c3" }
+  }
+}

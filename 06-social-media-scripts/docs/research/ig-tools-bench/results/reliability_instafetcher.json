@@ -1,0 +1,61 @@
+{
+ "tool": "insta-fetcher",
+ "results": [
+  {
+   "account": "nasa",
+   "status": "ok",
+   "t_s": 1.28,
+   "first_post": "Dbn-XJhk0_-",
+   "play_count": 6939548
+  },
+  {
+   "account": "openai",
+   "status": "ok",
+   "t_s": 1.91,
+   "first_post": "DboIbq4JKfe",
+   "play_count": 310855
+  },
+  {
+   "account": "natgeo",
+   "status": "ok",
+   "t_s": 1.83,
+   "first_post": "Dbru79IAdH-",
+   "play_count": 2101935
+  },
+  {
+   "account": "nike",
+   "status": "ok",
+   "t_s": 1.42,
+   "first_post": "Dbdo4gTupuE",
+   "play_count": 4307042
+  },
+  {
+   "account": "spotify",
+   "status": "ok",
+   "t_s": 1.8,
+   "first_post": "Dbtn_g4KSsz",
+   "play_count": 63576
+  },
+  {
+   "account": "anthropicai",
+   "status": "empty",
+   "t_s": 0.86,
+   "first_post": null,
+   "play_count": null
+  },
+  {
+   "account": "vercel",
+   "status": "ok",
+   "t_s": 1.16,
+   "first_post": "DbWX_0Pi206",
+   "play_count": 3176
+  },
+  {
+   "account": "github",
+   "status": "ok",
+   "t_s": 1.43,
+   "first_post": "Dbq653zgaKP",
+   "play_count": 15308
+  }
+ ]
+}

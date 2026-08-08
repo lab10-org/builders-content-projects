@@ -1,0 +1,35 @@
+{
+  "skill_name": "planning-tasks",
+  "evals": [
+    {
+      "id": 0,
+      "name": "bootstrap-from-scratch",
+      "prompt": "Ya aprobé el requirements.md y el design.md del spec que está en <SANDBOX>/2026-07-02-register-expenses/. Todavía no existe tasks.md. Necesito el plan de tareas para implementarlo: créalo e itera cada tarea hasta que el plan completo esté validado contra el spec y el estado real del código de este repo.",
+      "expected_output": "A tasks.md created in the sandbox spec folder following the project template (Task overview, Requirements coverage, detailed tasks), where a bootstrap planner ran first and then every task was individually iterated to CRITERIA MET; a final report stating 100% of tasks converged and leaving approval to the user.",
+      "files": ["sandbox copy of docs/specs/2026-07-02-register-expenses without tasks.md"],
+      "assertions": [
+        "tasks.md was created in the spec folder and follows the project template: it has a Task overview section, a Requirements coverage table, and one detailed entry per task",
+        "The process started with exactly ONE bootstrap planner invocation, followed by per-task iterations (report shows bootstrap first, then one invocation per task, sequentially)",
+        "Every task in the final tasks.md was individually iterated to an explicit CRITERIA MET verdict (or an explicit escalation with a reason) — no task was skipped",
+        "The Requirements coverage table maps every numbered acceptance criterion present in requirements.md to at least one task",
+        "Decision log and Outcome fields of every task are left empty — the run planned only and did not implement or pretend to execute anything",
+        "Task overview, detailed task entries, and Requirements coverage table reference a consistent set of task IDs (no orphan or missing IDs)"
+      ]
+    },
+    {
+      "id": 1,
+      "name": "iterate-existing-tasks",
+      "prompt": "El spec en <SANDBOX>/2026-07-02-register-expenses/ ya tiene un tasks.md en draft con 9 tareas (T1–T9). Audita e itera cada una de las tareas hasta que todas cumplan los criterios de planeación, teniendo en cuenta el estado actual del código del repo.",
+      "expected_output": "Every task T1–T9 (plus any splits) individually evaluated by a planner subagent, edits applied to tasks.md keeping overview/coverage in sync, and a final report with per-task verdicts showing 100% CRITERIA MET or explicit escalations.",
+      "files": ["sandbox copy of docs/specs/2026-07-02-register-expenses with current draft tasks.md"],
+      "assertions": [
+        "The run went straight to per-task iteration (no bootstrap): the report shows one planner invocation per existing task, covering ALL of T1–T9 plus any tasks created by splits",
+        "Every task received an explicit verdict, and 100% ended in CRITERIA MET or an explicit escalation with a stated reason (e.g. hit the iteration cap or needs a user decision)",
+        "Invocations were sequential and scoped to one task each (no batch like 'evaluate T4-T9 together')",
+        "After the edits, the Task overview, the detailed task entries, and the Requirements coverage table are still in sync (same set of task IDs everywhere)",
+        "The Requirements coverage table still maps every numbered acceptance criterion from requirements.md to at least one task",
+        "No implementation happened: no source files were created or modified in the repo; only tasks.md in the sandbox spec folder changed"
+      ]
+    }
+  ]
+}
